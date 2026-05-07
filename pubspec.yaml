@@ -1,0 +1,86 @@
+name: justdrink
+description: "JustDrink — Hyper-minimalist hydration tracker"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  bloc: ^8.1.4
+  equatable: ^2.0.5
+
+  # Navigation
+  go_router: ^14.3.0
+
+  # Local Database
+  drift: ^2.20.2
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # Key-Value Storage
+  shared_preferences: ^2.3.2
+
+  # Notifications
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  flutter_timezone: ^2.0.0
+
+  # Home Screen Widget
+  home_widget: ^0.7.0
+
+  # Health Integration
+  health: ^11.1.0
+
+  # In-App Purchase
+  in_app_purchase: ^3.2.0
+  in_app_purchase_android: ^0.3.6
+  in_app_purchase_storekit: ^0.3.17
+
+  # Ads
+  google_mobile_ads: ^5.1.0
+
+  # Charts
+  fl_chart: ^0.69.0
+
+  # Fonts
+  google_fonts: ^6.2.1
+
+  # Utilities
+  intl: ^0.19.0
+
+  # DI
+  get_it: ^8.0.2
+
+  # App Settings (open OS settings page)
+  app_settings: ^5.1.1
+
+  # Icons
+  flutter_svg: ^2.0.10+1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # Code generation for Drift
+  drift_dev: ^2.20.2
+  build_runner: ^2.4.12
+
+  # Testing
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+
