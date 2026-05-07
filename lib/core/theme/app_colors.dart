@@ -12,7 +12,8 @@ class AppColors {
   static const Color success = Color(0xFF00E676);
   static const Color error = Color(0xFFFF5252);
   static const Color undo = Colors.white60;
-  static const Color splashBackground = Color(0xFF72C1E0);
+  static const Color splashBackground = Color(0xFF5DCCFC);
+
 }
 
 
