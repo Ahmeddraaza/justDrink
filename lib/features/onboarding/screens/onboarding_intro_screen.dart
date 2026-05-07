@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -49,8 +50,8 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   void _nextPage() {
     if (_currentPage < 2) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
       );
     } else {
       context.read<OnboardingCubit>().completeOnboarding().then((_) {
@@ -75,7 +76,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
           return SafeArea(
             child: Column(
               children: [
-                // Header (Back button for pages > 0)
+                // Header
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
@@ -85,8 +86,8 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
                           icon: const Icon(Icons.arrow_back, color: AppColors.primary),
                           onPressed: () {
                             _pageController.previousPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOutCubic,
                             );
                           },
                         ),
@@ -126,17 +127,19 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
                           onPressed: state.isLoading ? null : _nextPage,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
+                            elevation: 2,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                           ),
                           child: state.isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CupertinoActivityIndicator(color: Colors.white)
                               : Text(
                                   _currentPage == 2 ? 'GET STARTED' : 'NEXT',
                                   style: AppTextStyles.button.copyWith(
                                     color: Colors.white,
-                                    letterSpacing: 1.2,
+                                    fontSize: 18,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                         ),
@@ -153,7 +156,8 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   }
 
   Widget _buildDot(int index) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       width: _currentPage == index ? 24 : 8,
       height: 8,
@@ -171,9 +175,9 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
       subtitle: 'Achieve your hydration goals with a simple tap!',
       extra: Column(
         children: [
-          const SizedBox(height: 24),
-          Text('Select Gender', style: AppTextStyles.bodySmall),
-          const SizedBox(height: 12),
+          const SizedBox(height: 32),
+          Text('Select Gender', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
           SegmentedButton<String>(
             segments: const [
               ButtonSegment(value: 'male', label: Text('Male')),
@@ -191,39 +195,28 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   Widget _buildPage2(OnboardingState state) {
     return _BasePage(
       imagePath: 'assets/images/boyWaterdrink.png',
-      title: 'Smart Reminders Tailored to You',
-      subtitle: 'Quick and easy to set your hydration goal & then track your daily progress.',
+      title: 'Personalize Your Plan',
+      subtitle: 'We use your weight and age to calculate your baseline goal.',
       extra: Column(
         children: [
           const SizedBox(height: 24),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Weight (${state.unitPreference == 'metric' ? 'kg' : 'lbs'})',
-                    hintText: 'e.g. 70',
-                  ),
-                  onChanged: (val) {
-                    final d = double.tryParse(val);
-                    if (d != null) context.read<OnboardingCubit>().setWeight(d);
-                  },
-                ),
+              _PickerColumn(
+                label: 'Weight (${state.unitPreference == 'metric' ? 'kg' : 'lbs'})',
+                value: state.weightKg.round(),
+                minValue: 30,
+                maxValue: 200,
+                onChanged: (val) => context.read<OnboardingCubit>().setWeight(val.toDouble()),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Age',
-                    hintText: 'e.g. 25',
-                  ),
-                  onChanged: (val) {
-                    final i = int.tryParse(val);
-                    if (i != null) context.read<OnboardingCubit>().setAge(i);
-                  },
-                ),
+              const SizedBox(width: 24),
+              _PickerColumn(
+                label: 'Age',
+                value: state.age,
+                minValue: 5,
+                maxValue: 100,
+                onChanged: (val) => context.read<OnboardingCubit>().setAge(val),
               ),
             ],
           ),
@@ -236,7 +229,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
     return _BasePage(
       imagePath: 'assets/images/waterbottle.png',
       title: 'Easy to Use – Drink, Tap, Repeat',
-      subtitle: 'Staying hydrated every day is easy with JustDrink Tracker.',
+      subtitle: 'Set your schedule and we\'ll remind you at the perfect intervals.',
       extra: Column(
         children: [
           const SizedBox(height: 24),
@@ -259,10 +252,17 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Daily Goal: ${state.calculatedGoalMl}ml',
-            style: AppTextStyles.h2.copyWith(color: AppColors.primary),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'Target: ${state.calculatedGoalMl}ml / day',
+              style: AppTextStyles.h2.copyWith(color: AppColors.primary, fontSize: 18),
+            ),
           ),
         ],
       ),
@@ -272,7 +272,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   Future<void> _showTimePicker(BuildContext context, bool isWake) async {
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: isWake ? const TimeOfDay(hour: 7, minute: 0) : const TimeOfDay(hour: 23, minute: 0),
     );
     if (time != null && mounted) {
       final formatted = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
@@ -300,27 +300,75 @@ class _BasePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(imagePath, height: 220),
-          const SizedBox(height: 40),
-          Text(
-            title,
-            style: AppTextStyles.h2.copyWith(color: AppColors.heading, fontSize: 24),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            subtitle,
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.body),
-            textAlign: TextAlign.center,
-          ),
-          extra,
-        ],
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            Image.asset(imagePath, height: 200, fit: BoxFit.contain),
+            const SizedBox(height: 32),
+            Text(
+              title,
+              style: AppTextStyles.h2.copyWith(color: AppColors.heading, fontSize: 24),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              subtitle,
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.body),
+              textAlign: TextAlign.center,
+            ),
+            extra,
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _PickerColumn extends StatelessWidget {
+  final String label;
+  final int value;
+  final int minValue;
+  final int maxValue;
+  final ValueChanged<int> onChanged;
+
+  const _PickerColumn({
+    required this.label,
+    required this.value,
+    required this.minValue,
+    required this.maxValue,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 120,
+          width: 80,
+          child: CupertinoPicker(
+            itemExtent: 40,
+            scrollController: FixedExtentScrollController(initialItem: value - minValue),
+            onSelectedItemChanged: (index) => onChanged(index + minValue),
+            children: List.generate(
+              maxValue - minValue + 1,
+              (index) => Center(
+                child: Text(
+                  '${index + minValue}',
+                  style: AppTextStyles.h2.copyWith(fontSize: 22, color: AppColors.primary),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -340,18 +388,19 @@ class _TimePickerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
         ),
         child: Column(
           children: [
-            Text(label, style: AppTextStyles.bodySmall),
-            const SizedBox(height: 4),
-            Text(time, style: AppTextStyles.h2.copyWith(fontSize: 18)),
+            Text(label, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(time, style: AppTextStyles.h2.copyWith(fontSize: 20, color: AppColors.primary)),
           ],
         ),
       ),
