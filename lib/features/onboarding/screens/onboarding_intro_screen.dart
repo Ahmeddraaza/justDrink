@@ -48,7 +48,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   }
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
@@ -64,6 +64,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      resizeToAvoidBottomInset: false,
       body: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
@@ -78,23 +79,50 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (_currentPage > 0)
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-                          onPressed: () {
+                        GestureDetector(
+                          onTap: () {
                             _pageController.previousPage(
                               duration: const Duration(milliseconds: 250),
                               curve: Curves.easeOutCubic,
                             );
                           },
-                        ),
-                      const Spacer(),
+                          child: const Icon(Icons.arrow_back_ios, color: AppColors.heading, size: 20),
+                        )
+                      else
+                        const SizedBox(width: 20),
+                      TextButton(
+                        onPressed: () {
+                          context.read<OnboardingCubit>().completeOnboarding().then((_) {
+                            context.go(Routes.dashboard);
+                          });
+                        },
+                        child: Text('Skip', style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey, fontSize: 16)),
+                      ),
                     ],
                   ),
                 ),
+                // "Personal hydration plan" badge
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Colors.transparent,
+                      backgroundImage: AssetImage('assets/images/boyWaterdrink.png'), // Or an appropriate icon
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Personal hydration plan',
+                      style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
                 // Main Content
                 Expanded(
                   child: PageView(
@@ -104,21 +132,22 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
                     children: [
                       _buildPage1(state),
                       _buildPage2(state),
+                      _buildPageSleepWake(state),
                       _buildPage3(state),
                     ],
                   ),
                 ),
                 // Footer
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   child: Column(
                     children: [
                       // Dot Indicator
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(3, (index) => _buildDot(index)),
+                        children: List.generate(4, (index) => _buildDot(index)),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
                       // Action Button
                       SizedBox(
                         width: double.infinity,
@@ -135,7 +164,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
                           child: state.isLoading
                               ? const CupertinoActivityIndicator(color: Colors.white)
                               : Text(
-                                  _currentPage == 2 ? 'GET STARTED' : 'NEXT',
+                                  _currentPage == 3 ? 'GET STARTED' : 'NEXT',
                                   style: AppTextStyles.button.copyWith(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -155,6 +184,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
     );
   }
 
+
   Widget _buildDot(int index) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -167,7 +197,6 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
       ),
     );
   }
-
   Widget _buildPage1(OnboardingState state) {
     return _BasePage(
       imagePath: 'assets/images/womenWaterdrink.png',
@@ -175,7 +204,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
       subtitle: 'Achieve your hydration goals with a simple tap!',
       extra: Column(
         children: [
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           Text('Select Gender', style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           SegmentedButton<String>(
@@ -199,7 +228,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
       subtitle: 'We use your weight and age to calculate your baseline goal.',
       extra: Column(
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -225,48 +254,240 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
     );
   }
 
-  Widget _buildPage3(OnboardingState state) {
+  Widget _buildPageSleepWake(OnboardingState state) {
     return _BasePage(
       imagePath: 'assets/images/waterbottle.png',
-      title: 'Easy to Use – Drink, Tap, Repeat',
-      subtitle: 'Set your schedule and we\'ll remind you at the perfect intervals.',
+      title: 'Your Schedule',
+      subtitle: 'Set your sleep and wake up times for reminders.',
       extra: Column(
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: _TimePickerTile(
                   label: 'Wake Up',
                   time: state.wakeTime,
+                  icon: Icons.wb_sunny_rounded,
                   onTap: () => _showTimePicker(context, true),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: _TimePickerTile(
                   label: 'Sleep',
                   time: state.sleepTime,
+                  icon: Icons.nights_stay_rounded,
                   onTap: () => _showTimePicker(context, false),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'Target: ${state.calculatedGoalMl}ml / day',
-              style: AppTextStyles.h2.copyWith(color: AppColors.primary, fontSize: 18),
-            ),
-          ),
         ],
       ),
     );
+  }
+
+  Widget _buildPage3(OnboardingState state) {
+    final int times = 10;
+    final int amountPerTime = (state.calculatedGoalMl / times).round();
+
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 80),
+          // Glass with Badge Graphic
+          GestureDetector(
+            onTap: () => _showEditTargetDialog(context, state.calculatedGoalMl),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // The Glass Outline
+                Container(
+                  width: 110,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 8),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
+                  ),
+                  alignment: Alignment.bottomCenter,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 110),
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) {
+                      return Container(
+                        height: value,
+                        margin: const EdgeInsets.all(4),
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${amountPerTime}ml',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // "x10" Badge
+                Positioned(
+                  top: -30,
+                  right: -50,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.elasticOut,
+                    builder: (context, scale, child) {
+                      return Transform.scale(
+                        scale: scale,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Left Ear
+                            Positioned(
+                              top: 0,
+                              left: 10,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            // Right Ear
+                            Positioned(
+                              top: 0,
+                              right: 10,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            // Main Badge Circle
+                            Container(
+                              width: 100,
+                              height: 100,
+                              margin: const EdgeInsets.only(top: 10),
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'x$times',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'How much should you drink',
+            style: AppTextStyles.h1.copyWith(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Target: ${state.calculatedGoalMl} ml / day',
+            style: AppTextStyles.h2.copyWith(
+              color: AppColors.primary,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$times times a day\n$amountPerTime ml each time',
+            style: AppTextStyles.bodyLarge.copyWith(
+              color: Colors.grey.shade600,
+              fontSize: 16,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: () => _showEditTargetDialog(context, state.calculatedGoalMl),
+            icon: const Icon(Icons.edit, color: Colors.grey, size: 16),
+            label: const Text('Edit Target', style: TextStyle(color: Colors.grey)),
+          )
+        ],
+      ),
+    ));
+  }
+
+  Future<void> _showEditTargetDialog(BuildContext context, int currentGoal) async {
+    final controller = TextEditingController(text: currentGoal.toString());
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Edit Daily Goal (ml)'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              hintText: 'e.g. 2500',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final val = int.tryParse(controller.text);
+                Navigator.pop(context, val);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+    if (result != null && mounted) {
+      context.read<OnboardingCubit>().setCalculatedGoalMl(result);
+    }
   }
 
   Future<void> _showTimePicker(BuildContext context, bool isWake) async {
@@ -300,29 +521,31 @@ class _BasePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            Image.asset(imagePath, height: 200, fit: BoxFit.contain),
-            const SizedBox(height: 32),
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 60),
+            Image.asset(imagePath, height: 180, fit: BoxFit.contain),
+            const SizedBox(height: 24),
             Text(
               title,
               style: AppTextStyles.h2.copyWith(color: AppColors.heading, fontSize: 24),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               subtitle,
               style: AppTextStyles.bodyMedium.copyWith(color: AppColors.body),
               textAlign: TextAlign.center,
             ),
-            extra,
-            const SizedBox(height: 20),
-          ],
+              extra,
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -376,11 +599,13 @@ class _PickerColumn extends StatelessWidget {
 class _TimePickerTile extends StatelessWidget {
   final String label;
   final String time;
+  final IconData icon;
   final VoidCallback onTap;
 
   const _TimePickerTile({
     required this.label,
     required this.time,
+    required this.icon,
     required this.onTap,
   });
 
@@ -388,19 +613,28 @@ class _TimePickerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+          border: Border.all(color: AppColors.primary.withOpacity(0.1)),
         ),
         child: Column(
           children: [
-            Text(label, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+            Icon(icon, color: AppColors.primary, size: 28),
             const SizedBox(height: 8),
-            Text(time, style: AppTextStyles.h2.copyWith(fontSize: 20, color: AppColors.primary)),
+            Text(label, style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, color: AppColors.heading)),
+            const SizedBox(height: 4),
+            Text(time, style: AppTextStyles.h2.copyWith(fontSize: 22, color: AppColors.primary)),
           ],
         ),
       ),

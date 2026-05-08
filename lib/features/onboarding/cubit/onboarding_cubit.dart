@@ -62,6 +62,10 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(state.copyWith(calculatedGoalMl: goal));
   }
 
+  void setCalculatedGoalMl(int goal) {
+    emit(state.copyWith(calculatedGoalMl: goal));
+  }
+
   Future<void> requestNotificationPermission() async {
     final granted = await notificationService.requestPermission();
     emit(state.copyWith(notificationPermissionGranted: granted));

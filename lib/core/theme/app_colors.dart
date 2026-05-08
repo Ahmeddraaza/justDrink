@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF72C1E0); // Figma Sky Blue
+  static const Color primary = Color(0xFF5DCCFC); // Figma Sky Blue
   static const Color heading = Color(0xFF0A1931); // Figma Deep Navy
   static const Color body = Color(0xFF7D8BB2); // Figma Grey-Blue
   static const Color background = Color(0xFFFFFFFF); // White
