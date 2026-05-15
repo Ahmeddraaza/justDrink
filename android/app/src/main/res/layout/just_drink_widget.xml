@@ -1,55 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="20dp"
     android:background="@drawable/widget_background">
 
-    <TextView
-        android:id="@+id/widget_title"
+    <!-- Water Wave Visual (Simplification) -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/widget_water_waves"
+        android:scaleType="centerCrop"
+        android:alpha="0.4"
+        android:layout_alignParentBottom="true" />
+
+    <TextClock
+        android:id="@+id/widget_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="JustDrink"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:layout_centerHorizontal="true"/>
+        android:format12Hour="hh:mm a"
+        android:textColor="#1A1C1E"
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/widget_intake"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/widget_title"
-        android:layout_centerHorizontal="true"
-        android:text="0 / 2500 ml"
-        android:textColor="#00D4FF"
+        android:layout_below="@id/widget_time"
+        android:text="0ml water(0 Glass)"
+        android:textColor="#8E9199"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="2dp"/>
 
-    <ProgressBar
-        android:id="@+id/widget_progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/widget_intake"
-        android:layout_marginTop="12dp"
-        android:progress="0"
-        android:max="100"/>
+    <!-- Floating Drop Icon -->
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/widget_water_drops"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/widget_progress"
-        android:layout_marginTop="12dp"
-        android:orientation="horizontal">
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp">
 
         <Button
-            android:id="@+id/widget_add_250"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="+250ml"
-            android:textSize="10sp"
-            android:backgroundTint="#0F2040"/>
+            android:id="@+id/widget_add_glass"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:text="Tap to Add Water"
+            android:textAllCaps="false"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="#1A1C1E"
+            android:background="@drawable/widget_button_pill"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"/>
     </LinearLayout>
 </RelativeLayout>

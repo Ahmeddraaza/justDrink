@@ -50,7 +50,10 @@ class DashboardCubit extends Cubit<DashboardState> {
     });
 
     _loadAdCounter();
-    emit(state.copyWith(isLoading: false));
+    emit(state.copyWith(
+      isLoading: false,
+      isWidgetAdded: preferencesService.isWidgetAdded,
+    ));
   }
 
   Future<void> _loadAdCounter() async {
@@ -85,6 +88,11 @@ class DashboardCubit extends Cubit<DashboardState> {
       emit(state.copyWith(showUndo: false, lastLoggedId: null));
       widgetSyncCubit.sync();
     }
+  }
+
+  Future<void> markWidgetAdded() async {
+    await preferencesService.setIsWidgetAdded(true);
+    emit(state.copyWith(isWidgetAdded: true));
   }
 
   @override

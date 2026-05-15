@@ -18,6 +18,7 @@ class OnboardingIntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('OnboardingIntroScreen building...');
     return BlocProvider(
       create: (context) => OnboardingCubit(
         userProfileDao: GetIt.I<UserProfileDao>(),

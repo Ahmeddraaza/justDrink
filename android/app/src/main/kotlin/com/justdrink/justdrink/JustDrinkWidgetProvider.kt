@@ -19,26 +19,25 @@ class JustDrinkWidgetProvider : HomeWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.just_drink_widget).apply {
                 val currentMl = widgetData.getInt("currentMl", 0)
-                val goalMl = widgetData.getInt("goalMl", 2500)
+                val glassSize = widgetData.getInt("glassSize", 250)
+                val glassesCount = widgetData.getInt("glassesCount", 0)
                 val progress = (widgetData.getFloat("progress", 0f) * 100).toInt()
 
-                setTextViewText(R.id.widget_intake, "$currentMl / $goalMl ml")
-                setProgressBar(R.id.widget_progress, 100, progress, false)
-
-                // Log 250ml Button - Background Intent
+                setTextViewText(R.id.widget_intake, "${currentMl}ml water($glassesCount Glass)")
+                
+                // Background Intent using dynamic glassSize
                 val logIntent = HomeWidgetBackgroundIntent.getBroadcast(
                     context,
-                    Uri.parse("justdrink://log?amount=250")
+                    Uri.parse("justdrink://log?amount=$glassSize")
                 )
-                setOnClickPendingIntent(R.id.widget_add_250, logIntent)
+                setOnClickPendingIntent(R.id.widget_add_glass, logIntent)
 
-                // App Launch Intent on Title/Progress click
+                // App Launch Intent
                 val launchIntent = HomeWidgetLaunchIntent.getActivity(
                     context,
                     MainActivity::class.java
                 )
-                setOnClickPendingIntent(R.id.widget_title, launchIntent)
-                setOnClickPendingIntent(R.id.widget_progress, launchIntent)
+                setOnClickPendingIntent(R.id.widget_container, launchIntent)
             }
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }

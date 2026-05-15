@@ -26,9 +26,15 @@ class SettingsCubit extends Cubit<SettingsState> {
         emit(state.copyWith(
           profile: profile,
           isPremium: profile.isPremium,
+          isWidgetAdded: preferencesService.isWidgetAdded,
         ));
       }
     });
+  }
+
+  Future<void> markWidgetAdded() async {
+    await preferencesService.setIsWidgetAdded(true);
+    emit(state.copyWith(isWidgetAdded: true));
   }
 
   Future<void> updateGoal(int goalMl) async {

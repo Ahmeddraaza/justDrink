@@ -13,7 +13,11 @@ class AppColors {
   static const Color error = Color(0xFFFF5252);
   static const Color undo = Colors.white60;
   static const Color splashBackground = Color(0xFF5DCCFC);
-
+  static const Color dashboardBackground = Color(0xFF0A1931);
+  static const Color wave1 = Color(0xFF1C3A70);
+  static const Color wave2 = Color(0xFF2B59B3);
+  static const Color wave3 = Color(0xFF3B77CC);
+  static const Color wave4 = Color(0xFF5DCCFC);
 }
 
 

@@ -84,6 +84,8 @@ class OnboardingCubit extends Cubit<OnboardingState> {
         wakeTime: Value(state.wakeTime),
         sleepTime: Value(state.sleepTime),
         onboardingComplete: const Value(true),
+        quickAdd1Ml: Value((state.calculatedGoalMl / 10).round()),
+        quickAdd2Ml: Value((state.calculatedGoalMl / 5).round()),
       );
 
       await userProfileDao.upsertProfile(profile);

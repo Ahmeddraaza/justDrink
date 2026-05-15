@@ -12,6 +12,7 @@ class DashboardState extends Equatable {
   final int? lastLoggedId;
   final int appLogCountToday;
   final bool isLoading;
+  final bool isWidgetAdded;
 
   const DashboardState({
     this.currentIntakeMl = 0,
@@ -24,6 +25,7 @@ class DashboardState extends Equatable {
     this.lastLoggedId,
     this.appLogCountToday = 0,
     this.isLoading = false,
+    this.isWidgetAdded = false,
   });
 
   DashboardState copyWith({
@@ -37,6 +39,7 @@ class DashboardState extends Equatable {
     int? lastLoggedId,
     int? appLogCountToday,
     bool? isLoading,
+    bool? isWidgetAdded,
   }) {
     return DashboardState(
       currentIntakeMl: currentIntakeMl ?? this.currentIntakeMl,
@@ -49,6 +52,7 @@ class DashboardState extends Equatable {
       lastLoggedId: lastLoggedId ?? this.lastLoggedId,
       appLogCountToday: appLogCountToday ?? this.appLogCountToday,
       isLoading: isLoading ?? this.isLoading,
+      isWidgetAdded: isWidgetAdded ?? this.isWidgetAdded,
     );
   }
 
@@ -64,5 +68,6 @@ class DashboardState extends Equatable {
         lastLoggedId,
         appLogCountToday,
         isLoading,
+        isWidgetAdded,
       ];
 }

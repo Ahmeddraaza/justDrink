@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -16,34 +17,36 @@ import 'app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. Timezone (must be before notifications)
-  tz.initializeTimeZones();
-  final localTimezone = await FlutterTimezone.getLocalTimezone();
-  tz.setLocalLocation(tz.getLocation(localTimezone));
+  try {
+    tz.initializeTimeZones();
+    final localTimezone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 2));
+    tz.setLocalLocation(tz.getLocation(localTimezone));
+  } catch (e) {
+    tz.setLocalLocation(tz.getLocation('UTC'));
+  }
 
-  // 2. SharedPreferences
   await PreferencesService.instance.initialize();
 
-  // 3. Drift Database
   await DatabaseService.initialize();
 
-  // 4. Notification Service
   final notificationService = NotificationService();
-  await notificationService.initialize();
+  try {
+    await notificationService.initialize().timeout(const Duration(seconds: 5));
+  } catch (e) {}
 
-  // 5. Widget Service
   final widgetService = WidgetService();
   await widgetService.initialize();
 
-  // 6. Ad Service (init MobileAds SDK)
   final adService = AdService();
-  await adService.initialize();
+  try {
+    await adService.initialize().timeout(const Duration(seconds: 3));
+  } catch (e) {}
 
-  // 7. Purchase Service (init stream listener)
   final purchaseService = PurchaseService();
-  await purchaseService.initialize();
+  try {
+    await purchaseService.initialize().timeout(const Duration(seconds: 3));
+  } catch (e) {}
 
-  // 8. Register all with GetIt
   final sl = GetIt.instance;
   DatabaseService.registerWithGetIt(sl);
   sl.registerSingleton<NotificationService>(notificationService);

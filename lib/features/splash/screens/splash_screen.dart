@@ -21,8 +21,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToNext() async {
+    print('Waiting 3 seconds...');
     await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
+    print('Navigating to next screen...');
+    if (!mounted) {
+      print('Not mounted!');
+      return;
+    }
 
     final prefs = GetIt.I<PreferencesService>();
     if (!prefs.isOnboardingComplete) {

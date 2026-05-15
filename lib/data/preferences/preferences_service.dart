@@ -49,4 +49,7 @@ class PreferencesService {
   bool get isPremium => getBool('is_premium') ?? false;
   String? get premiumProductId => getString('premium_product_id');
   bool get notificationPermissionAsked => getBool('notification_permission_asked') ?? false;
+  
+  bool get isWidgetAdded => getBool('is_widget_added') ?? false;
+  Future<void> setIsWidgetAdded(bool value) => setBool('is_widget_added', value);
 }

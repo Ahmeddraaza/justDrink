@@ -122,6 +122,7 @@ struct AddWaterIntent: AppIntent {
     }
 }
 
+@main
 struct JustDrinkWidget: Widget {
     let kind: String = "JustDrinkWidget"
 

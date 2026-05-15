@@ -17,16 +17,30 @@ class LogEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: AppColors.card, width: 1),
       ),
       child: Row(
         children: [
-          const Icon(Icons.water_drop, color: AppColors.primary, size: 24),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.water_drop, color: AppColors.primary, size: 20),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -34,18 +48,25 @@ class LogEntryTile extends StatelessWidget {
               children: [
                 Text(
                   '${log.amountMl} ml',
-                  style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.bold),
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.heading,
+                  ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   DateFormat('hh:mm a').format(log.loggedAt),
-                  style: AppTextStyles.bodySmall,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.body.withOpacity(0.8),
+                  ),
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+            icon: Icon(Icons.delete_outline, color: AppColors.error.withOpacity(0.7), size: 22),
             onPressed: onDelete,
+            visualDensity: VisualDensity.compact,
           ),
         ],
       ),

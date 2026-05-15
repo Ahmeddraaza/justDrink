@@ -28,6 +28,7 @@ import 'features/settings/screens/settings_screen.dart';
 import 'features/paywall/screens/paywall_screen.dart';
 import 'features/settings/screens/custom_volume_edit_screen.dart';
 import 'features/settings/screens/custom_notification_text_screen.dart';
+import 'features/reminder/screens/reminder_screen.dart';
 
 class JustDrinkApp extends StatelessWidget {
   const JustDrinkApp({super.key});
@@ -86,6 +87,7 @@ final _router = GoRouter(
         builder: (c, s) => const OnboardingIntroScreen()),
 
     GoRoute(path: Routes.dashboard,       builder: (c,s) => const DashboardScreen()),
+    GoRoute(path: Routes.reminder,        builder: (c,s) => const ReminderScreen()),
     GoRoute(path: Routes.history,         builder: (c,s) => const HistoryScreen()),
     GoRoute(path: Routes.settings,        builder: (c,s) => const SettingsScreen()),
     GoRoute(path: Routes.paywall,         builder: (c,s) => const PaywallScreen()),

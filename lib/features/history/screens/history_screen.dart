@@ -4,14 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import '../cubit/history_cubit.dart';
 import '../cubit/history_state.dart';
-import '../widgets/weekly_bar_chart.dart';
+import '../widgets/history_header.dart';
+import '../widgets/history_chart_section.dart';
 import '../widgets/log_entry_tile.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/water_log_dao.dart';
-import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../shared/widgets/banner_ad_widget.dart';
+import '../../../shared/widgets/floating_navbar.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -33,135 +34,105 @@ class _HistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      extendBody: true,
       appBar: AppBar(
-        title: Text('History', style: AppTextStyles.h2),
+        title: Text('Statistics', style: AppTextStyles.h2.copyWith(color: AppColors.heading)),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(Routes.dashboard),
+          icon: const Icon(Icons.menu, color: AppColors.heading),
+          onPressed: () => context.push(Routes.settings),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined, color: AppColors.heading),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(24),
-                children: [
-                  Text('Last 7 Days', style: AppTextStyles.bodyMedium),
-                  const SizedBox(height: 16),
-                  BlocBuilder<HistoryCubit, HistoryState>(
-                    builder: (context, state) {
-                      return WeeklyBarChart(
-                        totals: state.weeklyTotals,
-                        goalMl: 2500, // Ideally from a shared state or profile
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Today\'s Logs', style: AppTextStyles.bodyMedium),
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.white30),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  BlocBuilder<HistoryCubit, HistoryState>(
-                    builder: (context, state) {
-                      if (state.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (state.selectedDayLogs.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 40),
-                            child: Text(
-                              'No logs for today',
-                              style: AppTextStyles.bodySmall,
-                            ),
-                          ),
-                        );
-                      }
-                      return Column(
-                        children: state.selectedDayLogs
-                            .map((log) => LogEntryTile(
-                                  log: log,
-                                  onDelete: () => context
-                                      .read<HistoryCubit>()
-                                      .deleteLog(log.id),
-                                ))
-                            .toList(),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const BannerAdWidget(),
-            // Bottom Nav
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.white10)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _NavButton(
-                    icon: Icons.dashboard_rounded,
-                    label: 'Home',
-                    active: false,
-                    onTap: () => context.go(Routes.dashboard),
-                  ),
-                  _NavButton(
-                    icon: Icons.history_rounded,
-                    label: 'History',
-                    active: true,
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NavButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  const _NavButton({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
+      bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            color: active ? AppColors.primary : Colors.white30,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: active ? AppColors.primary : Colors.white30,
-              fontSize: 10,
-            ),
-          ),
+          const BannerAdWidget(),
+          const FloatingNavbar(activeRoute: Routes.history),
         ],
+      ),
+      body: BlocBuilder<HistoryCubit, HistoryState>(
+        builder: (context, state) {
+          if (state.isLoading && state.weeklyTotals.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final todayTotalMl = state.weeklyTotals.isNotEmpty 
+              ? state.weeklyTotals.last.totalMl 
+              : 0;
+
+          return RefreshIndicator(
+            onRefresh: () => context.read<HistoryCubit>().refresh(),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
+              children: [
+                HistoryHeader(
+                  todayTotalMl: todayTotalMl,
+                  goalMl: 2500, // This should probably come from a user settings cubit
+                ),
+                const SizedBox(height: 32),
+                HistoryChartSection(
+                  totals: state.weeklyTotals,
+                  period: state.period,
+                  goalMl: 2500,
+                  onPeriodChanged: (period) => 
+                      context.read<HistoryCubit>().changePeriod(period),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Activity Logs',
+                      style: AppTextStyles.h3.copyWith(color: AppColors.heading),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'View All',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (state.selectedDayLogs.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Column(
+                        children: [
+                          Icon(Icons.history_toggle_off, size: 48, color: AppColors.body.withOpacity(0.3)),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No activity for today yet',
+                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.body),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  ...state.selectedDayLogs.map((log) => LogEntryTile(
+                        log: log,
+                        onDelete: () => context.read<HistoryCubit>().deleteLog(log.id),
+                      )),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

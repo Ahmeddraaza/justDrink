@@ -85,6 +85,28 @@ class WaterLogDao extends DatabaseAccessor<AppDatabase>
     return results;
   }
 
+  // GET last 30 days daily totals
+  Future<List<DailyTotal>> getLast30DaysTotals() async {
+    final now = DateTime.now();
+    final results = <DailyTotal>[];
+
+    for (int i = 29; i >= 0; i--) {
+      final day = now.subtract(Duration(days: i));
+      final start = DateTime(day.year, day.month, day.day);
+      final end = start.add(const Duration(days: 1));
+
+      final query = selectOnly(waterLogs)
+        ..addColumns([waterLogs.amountMl.sum()])
+        ..where(waterLogs.loggedAt.isBiggerOrEqualValue(start))
+        ..where(waterLogs.loggedAt.isSmallerThanValue(end));
+
+      final row = await query.getSingleOrNull();
+      final total = row?.read(waterLogs.amountMl.sum()) ?? 0;
+      results.add(DailyTotal(date: start, totalMl: total));
+    }
+    return results;
+  }
+
   // GET today's in-app log count (source = 'app') for interstitial trigger
   Future<int> getTodayAppLogCount() async {
     final now = DateTime.now();

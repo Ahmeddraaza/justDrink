@@ -15,6 +15,12 @@ class AppTextStyles {
         color: AppColors.textPrimary,
       );
 
+  static TextStyle get h3 => GoogleFonts.outfit(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      );
+
   static TextStyle get bodyLarge => GoogleFonts.outfit(
         fontSize: 18,
         fontWeight: FontWeight.normal,

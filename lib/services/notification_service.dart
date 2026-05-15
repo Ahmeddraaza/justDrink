@@ -38,11 +38,15 @@ class NotificationService {
       ],
     );
 
-    await _plugin.initialize(
-      InitializationSettings(android: androidInit, iOS: iosInit),
-      onDidReceiveNotificationResponse: _onNotificationResponse,
-      onDidReceiveBackgroundNotificationResponse: _onBackgroundNotificationResponse,
-    );
+    try {
+      await _plugin.initialize(
+        InitializationSettings(android: androidInit, iOS: iosInit),
+        onDidReceiveNotificationResponse: _onNotificationResponse,
+        onDidReceiveBackgroundNotificationResponse: _onBackgroundNotificationResponse,
+      ).timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('Notification plugin initialization failed or timed out: $e');
+    }
   }
 
   // ── Permission ───────────────────────────────────────────────────────
