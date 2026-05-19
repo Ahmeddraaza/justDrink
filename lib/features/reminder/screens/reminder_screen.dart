@@ -32,26 +32,29 @@ class ReminderScreen extends StatelessWidget {
 
         final profile = snapshot.data!;
         
-        // Generate actual reminders dynamically strictly from their routine!
+        // We always calculate a beautifully distributed schedule of 10 reminders
         final tzTimes = NotificationScheduler.generate(
           wakeTime: profile.wakeTime,
           sleepTime: profile.sleepTime,
-          count: profile.remindersEnabled ? profile.reminderCount : 0,
+          count: 10,
         );
 
         final List<TimeOfDay> reminders = tzTimes
             .map((t) => TimeOfDay(hour: t.hour, minute: t.minute))
             .toList();
 
+        // Calculate next reminder time strictly among the active ones
+        final activeReminders = profile.isPremium ? reminders : reminders.take(6).toList();
+        
         String nextTime = '--:--';
         final now = TimeOfDay.now();
         final nowMinutes = now.hour * 60 + now.minute;
 
-        if (reminders.isNotEmpty && profile.remindersEnabled) {
-          reminders.sort((a, b) => (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute));
-          final next = reminders.firstWhere(
+        if (activeReminders.isNotEmpty && profile.remindersEnabled) {
+          activeReminders.sort((a, b) => (a.hour * 60 + a.minute).compareTo(b.hour * 60 + b.minute));
+          final next = activeReminders.firstWhere(
             (t) => (t.hour * 60 + t.minute) > nowMinutes,
-            orElse: () => reminders.first,
+            orElse: () => activeReminders.first,
           );
           nextTime = next.format(context);
         }
@@ -68,13 +71,6 @@ class ReminderScreen extends StatelessWidget {
               icon: const Icon(Icons.settings_outlined, color: AppColors.heading),
               onPressed: () => context.push(Routes.settings),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.add_circle_outline, size: 28, color: AppColors.primary),
-                onPressed: () => _addReminderFrequency(context, profile),
-              ),
-              const SizedBox(width: 8),
-            ],
           ),
           bottomNavigationBar: Column(
             mainAxisSize: MainAxisSize.min,
@@ -87,7 +83,7 @@ class ReminderScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
             children: [
               ReminderHeader(
-                totalReminders: reminders.length,
+                totalReminders: activeReminders.length,
                 nextReminderTime: nextTime,
               ),
               const SizedBox(height: 32),
@@ -99,7 +95,7 @@ class ReminderScreen extends StatelessWidget {
                     style: AppTextStyles.h3.copyWith(color: AppColors.heading),
                   ),
                   Text(
-                    'Dynamic Frequency',
+                    profile.isPremium ? '10 active reminders' : '6 active / 4 locked',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -111,37 +107,22 @@ class ReminderScreen extends StatelessWidget {
               ...reminders.asMap().entries.map((entry) {
                 final index = entry.key;
                 final time = entry.value;
+                final isLocked = !profile.isPremium && index >= 6;
+
                 return ReminderTile(
                   time: time,
-                  isActive: profile.remindersEnabled,
+                  isActive: profile.remindersEnabled && !isLocked,
+                  isLocked: isLocked,
                   onToggle: (val) => _toggleReminders(context, val),
-                  onTap: () => _showRoutineGuide(context),
-                  onDelete: () => _removeReminderFrequency(context, profile),
+                  onTap: () {
+                    if (isLocked) {
+                      context.push(Routes.paywall);
+                    } else {
+                      _showRoutineGuide(context);
+                    }
+                  },
                 );
               }),
-              if (reminders.isEmpty || !profile.remindersEnabled)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.notifications_off_outlined,
-                          size: 48,
-                          color: AppColors.body.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          profile.remindersEnabled
-                              ? 'Frequency set to 0. Add a reminder above!'
-                              : 'Reminders are disabled. Enable in Settings!',
-                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.body),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
             ],
           ),
         );
@@ -154,31 +135,6 @@ class ReminderScreen extends StatelessWidget {
     final updatedProfile = await GetIt.I<UserProfileDao>().getProfile();
     if (updatedProfile != null) {
       await GetIt.I<NotificationService>().rescheduleAll(updatedProfile);
-    }
-  }
-
-  Future<void> _addReminderFrequency(BuildContext context, UserProfileData profile) async {
-    final newCount = profile.reminderCount + 1;
-    if (!profile.isPremium && newCount > 6) {
-      // Direct user to paywall if they exceed free limit (6 reminders/day)
-      context.push(Routes.paywall);
-    } else {
-      await GetIt.I<UserProfileDao>().updateReminderCount(newCount);
-      final updatedProfile = await GetIt.I<UserProfileDao>().getProfile();
-      if (updatedProfile != null) {
-        await GetIt.I<NotificationService>().rescheduleAll(updatedProfile);
-      }
-    }
-  }
-
-  Future<void> _removeReminderFrequency(BuildContext context, UserProfileData profile) async {
-    if (profile.reminderCount > 0) {
-      final newCount = profile.reminderCount - 1;
-      await GetIt.I<UserProfileDao>().updateReminderCount(newCount);
-      final updatedProfile = await GetIt.I<UserProfileDao>().getProfile();
-      if (updatedProfile != null) {
-        await GetIt.I<NotificationService>().rescheduleAll(updatedProfile);
-      }
     }
   }
 

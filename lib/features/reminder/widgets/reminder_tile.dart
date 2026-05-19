@@ -7,7 +7,7 @@ class ReminderTile extends StatelessWidget {
   final bool isActive;
   final Function(bool) onToggle;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final bool isLocked;
 
   const ReminderTile({
     super.key,
@@ -15,15 +15,17 @@ class ReminderTile extends StatelessWidget {
     required this.isActive,
     required this.onToggle,
     required this.onTap,
-    required this.onDelete,
+    this.isLocked = false,
   });
 
   @override
   Widget build(BuildContext context) {
     const backgroundColor = Colors.white;
     const textColor = AppColors.heading;
-    final subTextColor = AppColors.body.withOpacity(0.8);
-    final iconColor = isActive ? AppColors.primary : AppColors.body;
+    final subTextColor = isLocked ? AppColors.primary : AppColors.body.withOpacity(0.8);
+    final iconColor = isLocked
+        ? AppColors.primary
+        : (isActive ? AppColors.primary : AppColors.body);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -38,7 +40,7 @@ class ReminderTile extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: AppColors.card,
+          color: isLocked ? AppColors.primary.withOpacity(0.3) : AppColors.card,
           width: 1.5,
         ),
       ),
@@ -59,7 +61,7 @@ class ReminderTile extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.access_time_rounded,
+                    isLocked ? Icons.lock_rounded : Icons.access_time_rounded,
                     color: iconColor,
                     size: 22,
                   ),
@@ -78,7 +80,9 @@ class ReminderTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        isActive ? 'Active' : 'Disabled',
+                        isLocked
+                            ? 'Locked (Premium Only)'
+                            : (isActive ? 'Active' : 'Disabled'),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: subTextColor,
                           fontWeight: FontWeight.w500,
@@ -87,23 +91,22 @@ class ReminderTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                Switch.adaptive(
-                  value: isActive,
-                  onChanged: onToggle,
-                  activeTrackColor: AppColors.heading,
-                  activeColor: Colors.white,
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: Icon(
-                    Icons.delete_sweep_outlined, 
-                    color: AppColors.error.withOpacity(0.8), 
-                    size: 24
+                if (isLocked)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
+                  )
+                else
+                  Switch.adaptive(
+                    value: isActive,
+                    onChanged: onToggle,
+                    activeTrackColor: AppColors.heading,
+                    activeColor: Colors.white,
                   ),
-                  onPressed: onDelete,
-                  visualDensity: VisualDensity.compact,
-                  tooltip: 'Delete Reminder',
-                ),
               ],
             ),
           ),

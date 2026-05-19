@@ -130,9 +130,7 @@ class NotificationService {
 
   Future<void> rescheduleAll(UserProfileData profile) async {
     final text = profile.customNotificationText ?? 'Time to drink water!';
-    final count = profile.isPremium
-        ? profile.reminderCount
-        : profile.reminderCount.clamp(1, 6);
+    final count = profile.isPremium ? 10 : 6;
     await scheduleAll(
       wakeTime: profile.wakeTime,
       sleepTime: profile.sleepTime,

@@ -6,6 +6,7 @@ import 'settings_state.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../services/notification_service.dart';
 import '../../../data/preferences/preferences_service.dart';
+import '../../../core/utils/hydration_calculator.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
   final UserProfileDao userProfileDao;
@@ -43,6 +44,30 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> updateWeight(double weightKg) async {
     await userProfileDao.updateWeight(weightKg);
+    if (state.profile != null) {
+      final newGoal = HydrationCalculator.calculate(
+        weightKg: weightKg,
+        age: state.profile!.age,
+        gender: state.profile!.gender,
+      );
+      await userProfileDao.updateDailyGoal(newGoal);
+      
+      final updatedProfile = await userProfileDao.getProfile();
+      if (updatedProfile != null) {
+        await notificationService.rescheduleAll(updatedProfile);
+      }
+    }
+  }
+
+  Future<void> updateScheduleTimes({
+    required String wakeTime,
+    required String sleepTime,
+  }) async {
+    await userProfileDao.updateSchedule(wakeTime: wakeTime, sleepTime: sleepTime);
+    final updatedProfile = await userProfileDao.getProfile();
+    if (updatedProfile != null) {
+      await notificationService.rescheduleAll(updatedProfile);
+    }
   }
 
   Future<void> toggleReminders(bool enabled) async {
@@ -68,7 +93,6 @@ class SettingsCubit extends Cubit<SettingsState> {
     if (state.profile != null) {
       await notificationService.rescheduleAll(state.profile!.copyWith(customNotificationText: Value(text)));
     }
-
   }
 
   @override

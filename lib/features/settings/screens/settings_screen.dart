@@ -10,7 +10,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../services/notification_service.dart';
 import '../../../data/preferences/preferences_service.dart';
-import '../../../shared/widgets/premium_gate_widget.dart';
 import '../../../shared/widgets/banner_ad_widget.dart';
 import '../widgets/settings_header.dart';
 import '../widgets/settings_card.dart';
@@ -68,6 +67,7 @@ class _SettingsView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
+              
               _SectionHeader(title: 'Hydration'),
               SettingsCard(
                 title: 'Daily Goal',
@@ -82,6 +82,7 @@ class _SettingsView extends StatelessWidget {
                 onTap: () => _showWeightEditDialog(context, profile.weightKg),
               ),
               const SizedBox(height: 16),
+              
               _SectionHeader(title: 'Reminders'),
               SettingsCard(
                 title: 'Notifications',
@@ -95,41 +96,63 @@ class _SettingsView extends StatelessWidget {
                 ),
               ),
               SettingsCard(
-                title: 'Daily Frequency',
-                subtitle: '${profile.reminderCount} times per day',
-                icon: Icons.repeat_rounded,
-                onTap: () => _showFrequencyDialog(context, profile.reminderCount, profile.isPremium),
-              ),
-              PremiumGateWidget(
-                child: SettingsCard(
-                  title: 'Custom Reminder Text',
-                  subtitle: profile.customNotificationText ?? 'Default message',
-                  icon: Icons.edit_notifications_outlined,
-                  onTap: () => context.push(Routes.customNotifText),
+                title: 'Wake Up Time',
+                subtitle: profile.wakeTime,
+                icon: Icons.wb_sunny_outlined,
+                onTap: () => _selectTime(
+                  context,
+                  profile.wakeTime,
+                  (formattedTime) => context.read<SettingsCubit>().updateScheduleTimes(
+                    wakeTime: formattedTime,
+                    sleepTime: profile.sleepTime,
+                  ),
                 ),
+              ),
+              SettingsCard(
+                title: 'Sleep Time',
+                subtitle: profile.sleepTime,
+                icon: Icons.nightlight_outlined,
+                onTap: () => _selectTime(
+                  context,
+                  profile.sleepTime,
+                  (formattedTime) => context.read<SettingsCubit>().updateScheduleTimes(
+                    wakeTime: profile.wakeTime,
+                    sleepTime: formattedTime,
+                  ),
+                ),
+              ),
+              SettingsCard(
+                title: 'Custom Reminder Text',
+                subtitle: profile.customNotificationText ?? 'Default message',
+                icon: Icons.edit_notifications_outlined,
+                onTap: () => context.push(Routes.customNotifText),
               ),
               const SizedBox(height: 16),
+              
               _SectionHeader(title: 'App Settings'),
-              if (!state.isWidgetAdded)
-                SettingsCard(
-                  title: 'Add Widget',
-                  subtitle: 'Add JustDrink to your home screen',
-                  icon: Icons.widgets_outlined,
-                  onTap: () => _onAddWidget(context),
-                ),
-              PremiumGateWidget(
-                child: SettingsCard(
-                  title: 'Custom Log Volumes',
-                  subtitle: 'Modify your quick add amounts',
-                  icon: Icons.liquor_outlined,
-                  onTap: () => context.push(Routes.customVolume),
-                ),
+              SettingsCard(
+                title: 'Add Widget',
+                subtitle: 'Add JustDrink to your home screen',
+                icon: Icons.widgets_outlined,
+                onTap: () => _onAddWidget(context),
+              ),
+              SettingsCard(
+                title: 'Custom Log Volumes',
+                subtitle: 'Modify your quick add amounts',
+                icon: Icons.liquor_outlined,
+                onTap: () => context.push(Routes.customVolume),
+              ),
+              SettingsCard(
+                title: 'Terms & Conditions',
+                subtitle: 'Read our terms of service',
+                icon: Icons.description_outlined,
+                onTap: () => _showTermsDialog(context),
               ),
               SettingsCard(
                 title: 'Privacy Policy',
                 subtitle: 'View how we handle your data',
                 icon: Icons.privacy_tip_outlined,
-                onTap: () {}, // Link to web
+                onTap: () => _showPrivacyDialog(context),
               ),
               const SizedBox(height: 32),
               const BannerAdWidget(),
@@ -148,10 +171,6 @@ class _SettingsView extends StatelessWidget {
   }
 
   void _onAddWidget(BuildContext context) async {
-    // 1. Mark as added in state (hides button)
-    context.read<SettingsCubit>().markWidgetAdded();
-
-    // 2. Platform specific action
     try {
       final widgetService = GetIt.I<WidgetService>();
       await widgetService.requestPinWidget();
@@ -163,6 +182,37 @@ class _SettingsView extends StatelessWidget {
       }
     } catch (e) {
       debugPrint('Error pinning widget: $e');
+    }
+  }
+
+  Future<void> _selectTime(
+    BuildContext context,
+    String currentTimeStr,
+    Function(String) onSave,
+  ) async {
+    final parts = currentTimeStr.split(':').map(int.parse).toList();
+    final initial = TimeOfDay(hour: parts[0], minute: parts[1]);
+    
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.heading,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null) {
+      final formatted = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      onSave(formatted);
     }
   }
 
@@ -292,27 +342,56 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
-  void _showFrequencyDialog(BuildContext context, int current, bool isPremium) {
+  void _showTermsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (dContext) => AlertDialog(
-        title: Text('Reminder Frequency', style: AppTextStyles.h3),
+        title: Text('Terms & Conditions', style: AppTextStyles.h3),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [4, 6, 8, 10, 12].map((count) {
-            final isLocked = count > 6 && !isPremium;
-            final isSelected = count == current;
-            return ListTile(
-              title: Text('$count times per day', style: AppTextStyles.bodyMedium),
-              trailing: isLocked ? const Icon(Icons.lock, size: 16) : (isSelected ? const Icon(Icons.check, color: AppColors.primary) : null),
-              onTap: isLocked ? null : () {
-                context.read<SettingsCubit>().updateReminderCount(count);
-                Navigator.pop(dContext);
-              },
-            );
-          }).toList(),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Welcome to JustDrink.\n\nBy using our app, you agree to track your hydration responsibly. The daily goal is a general recommendation based on weight, age, and gender, but you should consult a doctor if you have special medical conditions.\n\nAll tracking data is stored strictly on your local device. Enjoy staying hydrated!',
+            style: TextStyle(color: AppColors.body, height: 1.4),
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(dContext),
+            child: const Text('Agree'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrivacyDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dContext) => AlertDialog(
+        title: Text('Privacy Policy', style: AppTextStyles.h3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: const SingleChildScrollView(
+          child: Text(
+            'We value your privacy.\n\nJustDrink does not collect or store any of your personal metrics or water logs on remote servers. All your weights, hydration routines, and habits are stored offline in your private on-device database.\n\nYour data is 100% private and owned entirely by you.',
+            style: TextStyle(color: AppColors.body, height: 1.4),
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(dContext),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
