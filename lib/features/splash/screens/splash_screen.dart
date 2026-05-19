@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import '../../../core/constants/route_constants.dart';
@@ -13,11 +14,23 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat();
     _navigateToNext();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _navigateToNext() async {
@@ -60,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
+                 // Logo
                 Image.asset(
                   'assets/images/logoicon.png',
                   width: 120,
@@ -92,13 +105,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(3, (index) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                    final double delay = index * 0.15;
+                    return _JumpingDot(
+                      animation: CurvedAnimation(
+                        parent: _animationController,
+                        curve: Interval(
+                          delay,
+                          (delay + 0.65).clamp(0.0, 1.0),
+                          curve: const _BounceCurve(),
+                        ),
                       ),
                     );
                   }),
@@ -108,6 +123,42 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BounceCurve extends Curve {
+  const _BounceCurve();
+
+  @override
+  double transform(double t) {
+    return math.sin(t * math.pi);
+  }
+}
+
+class _JumpingDot extends StatelessWidget {
+  final Animation<double> animation;
+
+  const _JumpingDot({required this.animation});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, -14 * animation.value),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
     );
   }
 }

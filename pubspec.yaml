@@ -76,6 +76,12 @@ dev_dependencies:
   # Testing
   bloc_test: ^9.1.7
   mocktail: ^1.0.4
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/newlogo.png"
 
 flutter:
   uses-material-design: true

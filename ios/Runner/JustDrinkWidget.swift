@@ -9,10 +9,10 @@ struct Provider: TimelineProvider {
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
         let entry = SimpleEntry(
             date: Date(),
-            currentMl: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "currentMl") ?? 0,
-            goalMl: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "goalMl") ?? 2500,
-            glassSize: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "glassSize") ?? 250,
-            glassesCount: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "glassesCount") ?? 0
+            currentMl: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "currentMl") ?? 0,
+            goalMl: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "goalMl") ?? 2500,
+            glassSize: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "glassSize") ?? 250,
+            glassesCount: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "glassesCount") ?? 0
         )
         completion(entry)
     }
@@ -21,10 +21,10 @@ struct Provider: TimelineProvider {
         let date = Date()
         let entry = SimpleEntry(
             date: date,
-            currentMl: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "currentMl") ?? 0,
-            goalMl: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "goalMl") ?? 2500,
-            glassSize: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "glassSize") ?? 250,
-            glassesCount: UserDefaults(suiteName: "group.com.swifteck.justdrink")?.integer(forKey: "glassesCount") ?? 0
+            currentMl: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "currentMl") ?? 0,
+            goalMl: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "goalMl") ?? 2500,
+            glassSize: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "glassSize") ?? 250,
+            glassesCount: UserDefaults(suiteName: "group.com.hanotech.justdrink")?.integer(forKey: "glassesCount") ?? 0
         )
 
         let timeline = Timeline(entries: [entry], policy: .atEnd)
@@ -116,7 +116,7 @@ struct AddWaterIntent: AppIntent {
     
     func perform() async throws -> some IntentResult {
         let url = URL(string: "justdrink://log?amount=\(amount)")!
-        _ = try? await UserDefaults(suiteName: "group.com.swifteck.justdrink")?.set(amount, forKey: "lastLoggedAmount")
+        _ = try? await UserDefaults(suiteName: "group.com.hanotech.justdrink")?.set(amount, forKey: "lastLoggedAmount")
         // HomeWidget uses the URL to trigger the background callback
         return .result()
     }

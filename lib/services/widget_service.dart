@@ -3,7 +3,7 @@ import 'package:home_widget/home_widget.dart';
 import '../data/database/app_database.dart';
 
 class WidgetService {
-  static const _appGroupId   = 'group.com.swifteck.justdrink';  // iOS App Group
+  static const _appGroupId   = 'group.com.hanotech.justdrink';  // iOS App Group
   static const _androidClass = 'com.justdrink.app.JustDrinkWidgetProvider';
   static const _iOSName      = 'JustDrinkWidget';
 
