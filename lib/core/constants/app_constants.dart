@@ -5,7 +5,7 @@ class AppConstants {
   static const interstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
 
   // Widget identifiers
-  static const widgetAppGroupId = 'group.com.hanotech.justdrink.3MKRPJ4PJ2';
+  static const widgetAppGroupId = 'group.com.hanotech.justdrink.apppgroup';
   static const widgetAndroidName = 'com.justdrink.app.JustDrinkWidgetProvider';
   static const widgetIOSName = 'JustDrinkWidget';
 
