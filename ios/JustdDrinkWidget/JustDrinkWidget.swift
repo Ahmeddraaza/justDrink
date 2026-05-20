@@ -2,7 +2,7 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 
-private let appGroup = "group.com.hanotech.justdrink.3MKRPJ4PJ2"
+private let appGroup = "group.com.hanotech.justdrink.apppgroup"
 
 // MARK: - Background Log Intent (no app launch)
 struct LogWaterIntent: AppIntent {
