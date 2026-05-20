@@ -304,7 +304,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastSwiftUpdateCheck = 2610;
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
@@ -317,7 +317,7 @@
 						LastSwiftMigration = 1100;
 					};
 					CE06DCED2FADE29300230722 = {
-						CreatedOnToolsVersion = 26.1.1;
+						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
