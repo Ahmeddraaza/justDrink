@@ -22,8 +22,9 @@ struct LogWaterIntent: AppIntent {
         defaults?.set(newMl,       forKey: "currentMl")
         defaults?.set(newGlasses,  forKey: "glassesCount")
         defaults?.set(newProgress, forKey: "progress")
-        // Signal the app to sync on next foreground
-        defaults?.set(glassSize,   forKey: "pendingWidgetLogMl")
+        // Signal the app to sync on next foreground by accumulating pending logs
+        let pending = defaults?.integer(forKey: "pendingWidgetLogMl") ?? 0
+        defaults?.set(pending + glassSize, forKey: "pendingWidgetLogMl")
 
         WidgetCenter.shared.reloadAllTimelines()
         return .result()

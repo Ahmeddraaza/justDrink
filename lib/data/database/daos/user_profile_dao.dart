@@ -10,12 +10,25 @@ class UserProfileDao extends DatabaseAccessor<AppDatabase>
   UserProfileDao(super.db);
 
   // GET the single profile row
-  Future<UserProfileData?> getProfile() =>
-      (select(userProfile)..where((t) => t.id.equals(1))).getSingleOrNull();
+  Future<UserProfileData?> getProfile() async {
+    final profile = await (select(userProfile)..where((t) => t.id.equals(1))).getSingleOrNull();
+    if (profile != null) {
+      return profile.copyWith(isPremium: true);
+    }
+    return null;
+  }
 
   // WATCH profile stream for reactive UI
-  Stream<UserProfileData?> watchProfile() =>
-      (select(userProfile)..where((t) => t.id.equals(1))).watchSingleOrNull();
+  Stream<UserProfileData?> watchProfile() {
+    return (select(userProfile)..where((t) => t.id.equals(1)))
+        .watchSingleOrNull()
+        .map((profile) {
+          if (profile != null) {
+            return profile.copyWith(isPremium: true);
+          }
+          return null;
+        });
+  }
 
   // UPDATE weight
   Future<void> updateWeight(double weightKg) => (update(userProfile)

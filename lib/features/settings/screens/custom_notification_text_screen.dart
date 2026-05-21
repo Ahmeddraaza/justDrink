@@ -74,7 +74,7 @@ class _CustomNotificationTextViewState
                 maxLength: 50,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'e.g. Drink up, you sexy human!',
+                  hintText: 'e.g. Time to drink water!',
                 ),
               ),
               const Spacer(),
