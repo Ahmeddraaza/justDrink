@@ -165,7 +165,7 @@ class NotificationService {
         );
         await plugin.zonedSchedule(
           notifId + 1000,
-          'JustDrink 💧',
+          'JustDrink',
           'Time to drink water! (Snoozed)',
           snoozeTime,
           const NotificationDetails(

@@ -202,8 +202,6 @@ class _DashboardView extends StatelessWidget {
                 BlocBuilder<DashboardCubit, DashboardState>(
                   builder: (context, state) {
                     final int percentage = ((state.currentIntakeMl / state.dailyGoalMl) * 100).toInt();
-                    final double fillFraction = (state.currentIntakeMl / state.dailyGoalMl);
-                    final isLight = fillFraction > 0.6;
                     final glasses = (state.currentIntakeMl / 250).floor();
                     
                     return Column(
@@ -214,21 +212,21 @@ class _DashboardView extends StatelessWidget {
                           children: [
                             Text(
                               '$percentage',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 100,
                                 fontWeight: FontWeight.w900,
-                                color: isLight ? AppColors.dashboardBackground : Colors.white,
+                                color: Colors.white,
                                 height: 1,
                               ),
                             ),
-                            Padding(
+                            const Padding(
                               padding: const EdgeInsets.only(top: 20),
                               child: Text(
                                 '%',
                                 style: TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
-                                  color: isLight ? AppColors.dashboardBackground : Colors.white70,
+                                  color: Colors.white70,
                                 ),
                               ),
                             ),
@@ -238,15 +236,15 @@ class _DashboardView extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isLight ? AppColors.dashboardBackground.withOpacity(0.1) : Colors.white10,
+                            color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             '$glasses Glasses logged',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: isLight ? AppColors.dashboardBackground : Colors.white,
+                              color: Colors.white,
                             ),
                           ),
                         ),
