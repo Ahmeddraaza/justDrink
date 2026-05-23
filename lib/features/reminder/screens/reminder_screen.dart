@@ -14,9 +14,14 @@ import '../../../services/notification_service.dart';
 import '../widgets/reminder_header.dart';
 import '../widgets/reminder_tile.dart';
 
-class ReminderScreen extends StatelessWidget {
+class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});
 
+  @override
+  State<ReminderScreen> createState() => _ReminderScreenState();
+}
+
+class _ReminderScreenState extends State<ReminderScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<UserProfileData?>(
@@ -69,7 +74,7 @@ class ReminderScreen extends StatelessWidget {
             elevation: 0,
             centerTitle: true,
             leading: IconButton(
-              icon: const Icon(Icons.settings_outlined, color: AppColors.heading),
+              icon: const Icon(Icons.menu, color: AppColors.heading, size: 28),
               onPressed: () => context.push(Routes.settings),
             ),
           ),
@@ -161,6 +166,10 @@ class ReminderScreen extends StatelessWidget {
     }
     
     await prefs.setDisabledReminderTimes(currentDisabled);
+    
+    if (mounted) {
+      setState(() {});
+    }
     
     final profile = await GetIt.I<UserProfileDao>().getProfile();
     if (profile != null) {
