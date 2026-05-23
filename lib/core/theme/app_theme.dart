@@ -59,6 +59,12 @@ class AppTheme {
         error: AppColors.error,
         onSurface: AppColors.heading,
       ),
+      timePickerTheme: TimePickerThemeData(
+        dayPeriodColor: WidgetStateColor.resolveWith((states) => 
+            states.contains(WidgetState.selected) ? AppColors.primary : Colors.transparent),
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) => 
+            states.contains(WidgetState.selected) ? Colors.white : AppColors.heading),
+      ),
     );
   }
 
@@ -98,7 +104,12 @@ class AppTheme {
         surface: AppColors.surface,
         error: AppColors.error,
       ),
-
+      timePickerTheme: TimePickerThemeData(
+        dayPeriodColor: WidgetStateColor.resolveWith((states) => 
+            states.contains(WidgetState.selected) ? AppColors.primary : Colors.transparent),
+        dayPeriodTextColor: WidgetStateColor.resolveWith((states) => 
+            states.contains(WidgetState.selected) ? Colors.white : AppColors.heading),
+      ),
     );
   }
 }
