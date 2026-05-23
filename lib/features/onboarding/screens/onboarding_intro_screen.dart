@@ -201,7 +201,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
   Widget _buildPage1(OnboardingState state) {
     return _BasePage(
       imagePath: 'assets/images/womenWaterdrink.png',
-      title: 'Track your daily water intake with Us.',
+      title: 'Track your daily water intake with us.',
       subtitle: 'Achieve your hydration goals with a simple tap!',
       extra: Column(
         children: [

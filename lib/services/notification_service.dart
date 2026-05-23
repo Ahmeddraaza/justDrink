@@ -5,6 +5,7 @@ import '../core/constants/notification_constants.dart';
 import '../core/utils/notification_scheduler.dart';
 import '../data/database/app_database.dart';
 import '../data/database/daos/user_profile_dao.dart';
+import '../data/preferences/preferences_service.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:flutter/foundation.dart';
 
@@ -84,8 +85,19 @@ class NotificationService {
       count: reminderCount,
     );
 
+    final disabledTimes = PreferencesService.instance.disabledReminderTimes;
+
     for (int i = 0; i < times.length; i++) {
       final time = times[i];
+      
+      final hourStr = time.hour.toString().padLeft(2, '0');
+      final minStr = time.minute.toString().padLeft(2, '0');
+      final timeString = '$hourStr:$minStr';
+
+      if (disabledTimes.contains(timeString)) {
+        continue;
+      }
+
       await _plugin.zonedSchedule(
         i,
         'JustDrink 💧',
@@ -120,7 +132,6 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
       );
-
     }
   }
 

@@ -13,6 +13,7 @@ import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../data/preferences/preferences_service.dart';
 import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
+import 'package:flutter/services.dart';
 import '../../../shared/widgets/floating_navbar.dart';
 
 import '../../../services/widget_service.dart';
@@ -44,283 +45,579 @@ class _DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.dashboardBackground,
-      extendBody: true,
-      bottomNavigationBar: const FloatingNavbar(activeRoute: Routes.dashboard),
-      body: Stack(
-        children: [
-          // 0. Background Gradient
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.dashboardBackground,
-                    const Color(0xFF162A4D),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // 1. Background Waves
-          Positioned.fill(
-            child: BlocBuilder<DashboardCubit, DashboardState>(
-              builder: (context, state) {
-                final double percentage = (state.currentIntakeMl / state.dailyGoalMl).clamp(0.0, 1.0);
-                final double screenHeight = MediaQuery.of(context).size.height;
-                final double fillHeight = screenHeight * percentage;
-
-                return Stack(
-                  children: [
-                    AnimatedWaves(
-                      height: fillHeight,
-                      color: AppColors.wave1.withOpacity(0.4),
-                      speed: 0.6,
-                      offset: 0,
-                    ),
-                    AnimatedWaves(
-                      height: fillHeight * 0.95,
-                      color: AppColors.wave2.withOpacity(0.6),
-                      speed: 0.9,
-                      offset: 1.5,
-                    ),
-                    AnimatedWaves(
-                      height: fillHeight * 0.9,
-                      color: AppColors.wave3.withOpacity(0.8),
-                      speed: 0.7,
-                      offset: 3.0,
-                    ),
-                    AnimatedWaves(
-                      height: fillHeight * 0.85,
-                      color: AppColors.wave4,
-                      speed: 1.1,
-                      offset: 4.5,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-
-          // 2. Side Markers
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 100, // Increased width to prevent text truncation
-            child: BlocBuilder<DashboardCubit, DashboardState>(
-              builder: (context, state) {
-                return Stack(
-                  children: [
-                    // Vertical Line
-                    Positioned(
-                      left: 24,
-                      top: 150,
-                      bottom: 150,
-                      child: Container(
-                        width: 1.5, // Slightly thicker for visibility
-                        color: Colors.white24,
-                      ),
-                    ),
-                    // Goal Marker (Static at the top)
-                    _Marker(
-                      label: '${state.dailyGoalMl}ML',
-                      top: 150,
-                      active: true,
-                    ),
-                    // Current Marker (Dynamic)
-                    _DynamicMarker(
-                      currentMl: state.currentIntakeMl,
-                      goalMl: state.dailyGoalMl,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-
-          // 3. Main Content
-          SafeArea(
-            child: Column(
-              children: [
-                // Top Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                        onPressed: () => context.push(Routes.settings),
-                      ),
-                      BlocBuilder<DashboardCubit, DashboardState>(
-                        builder: (context, state) {
-                          return Text(
-                            '${state.dailyGoalMl}ML',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          );
-                        },
-                      ),
-                      BlocBuilder<DashboardCubit, DashboardState>(
-                        builder: (context, state) {
-                          if (state.isWidgetAdded) return const SizedBox(width: 48);
-                          return TextButton(
-                            onPressed: () => _onAddWidget(context),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white24,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.white30),
-                              ),
-                              child: Text(
-                                'ADD WIDGET',
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1A365D),
+        extendBody: true,
+        bottomNavigationBar: const FloatingNavbar(activeRoute: Routes.dashboard),
+        body: Stack(
+          children: [
+            // 0. Background Gradient
+            Positioned.fill(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF1A365D), // Lighter premium navy
+                      Color(0xFF2B6CB0), // Radiant blue
                     ],
                   ),
                 ),
+              ),
+            ),
+            // 1. Background Waves
+            Positioned.fill(
+              child: BlocBuilder<DashboardCubit, DashboardState>(
+                builder: (context, state) {
+                  final double percentage = (state.currentIntakeMl / state.dailyGoalMl).clamp(0.0, 1.0);
+                  final double screenHeight = MediaQuery.of(context).size.height;
+                  final double fillHeight = screenHeight * percentage;
 
-                const Spacer(flex: 1),
+                  return Stack(
+                    children: [
+                      AnimatedWaves(
+                        height: fillHeight,
+                        color: AppColors.wave1.withOpacity(0.4),
+                        speed: 0.6,
+                        offset: 0,
+                      ),
+                      AnimatedWaves(
+                        height: fillHeight * 0.95,
+                        color: AppColors.wave2.withOpacity(0.6),
+                        speed: 0.9,
+                        offset: 1.5,
+                      ),
+                      AnimatedWaves(
+                        height: fillHeight * 0.9,
+                        color: AppColors.wave3.withOpacity(0.8),
+                        speed: 0.7,
+                        offset: 3.0,
+                      ),
+                      AnimatedWaves(
+                        height: fillHeight * 0.85,
+                        color: AppColors.wave4,
+                        speed: 1.1,
+                        offset: 4.5,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
 
-                // Percentage & Glasses
-                BlocBuilder<DashboardCubit, DashboardState>(
-                  builder: (context, state) {
-                    final int percentage = ((state.currentIntakeMl / state.dailyGoalMl) * 100).toInt();
-                    final glasses = (state.currentIntakeMl / 250).floor();
-                    
-                    return Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '$percentage',
+            // 2. Side Markers
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 100,
+              child: BlocBuilder<DashboardCubit, DashboardState>(
+                builder: (context, state) {
+                  return Stack(
+                    children: [
+                      // Vertical Line
+                      Positioned(
+                        left: 24,
+                        top: 150,
+                        bottom: 150,
+                        child: Container(
+                          width: 1.5,
+                          color: Colors.white24,
+                        ),
+                      ),
+                      // Goal Marker (Static at the top)
+                      _Marker(
+                        label: '${state.dailyGoalMl}ML',
+                        top: 150,
+                        active: true,
+                      ),
+                      // Current Marker (Dynamic)
+                      _DynamicMarker(
+                        currentMl: state.currentIntakeMl,
+                        goalMl: state.dailyGoalMl,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+
+            // 3. Main Content
+            SafeArea(
+              child: Column(
+                children: [
+                  // Top Bar (Centered stack design)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: SizedBox(
+                      height: 48,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Positioned(
+                            left: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                              onPressed: () => context.push(Routes.settings),
+                            ),
+                          ),
+                          BlocBuilder<DashboardCubit, DashboardState>(
+                            builder: (context, state) {
+                              return Text(
+                                '${state.dailyGoalMl}ML',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.5,
+                                  fontSize: 16,
+                                ),
+                              );
+                            },
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                BlocBuilder<DashboardCubit, DashboardState>(
+                                  builder: (context, state) {
+                                    if (state.isWidgetAdded) return const SizedBox.shrink();
+                                    return TextButton(
+                                      onPressed: () => _onAddWidget(context),
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        minimumSize: Size.zero,
+                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white24,
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: Colors.white30),
+                                        ),
+                                        child: Text(
+                                          '+ WIDGET',
+                                          style: AppTextStyles.bodySmall.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 9,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFFF1C40F), Color(0xFFF39C12)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.amber.withOpacity(0.3),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 12),
+                                      SizedBox(width: 3),
+                                      Text(
+                                        'PRO',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 9,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const Spacer(flex: 1),
+
+                  // Percentage & Glasses
+                  BlocBuilder<DashboardCubit, DashboardState>(
+                    builder: (context, state) {
+                      final int percentage = ((state.currentIntakeMl / state.dailyGoalMl) * 100).toInt();
+                      final glasses = state.quickAdd1Ml > 0
+                          ? (state.currentIntakeMl / state.quickAdd1Ml).round()
+                          : 0;
+
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '$percentage',
+                                style: const TextStyle(
+                                  fontSize: 100,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  height: 1,
+                                ),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 20),
+                                child: Text(
+                                  '%',
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '$glasses Glasses logged',
                               style: const TextStyle(
-                                fontSize: 100,
-                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                height: 1,
                               ),
                             ),
-                            const Padding(
-                              padding: const EdgeInsets.only(top: 20),
-                              child: Text(
-                                '%',
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white70,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  const Spacer(flex: 2),
+
+                  // Add Button & Switch Cup
+                  BlocBuilder<DashboardCubit, DashboardState>(
+                    builder: (context, state) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(width: 60), // Keeps main add button centered
+                          GestureDetector(
+                            onTap: () => context.read<DashboardCubit>().logWater(state.quickAdd1Ml),
+                            child: Container(
+                              width: 90,
+                              height: 90,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.15),
+                                    blurRadius: 25,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.local_drink_rounded,
+                                  color: AppColors.wave3,
+                                  size: 40,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Text(
-                            '$glasses Glasses logged',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          const SizedBox(width: 16),
+                          GestureDetector(
+                            onTap: () => _showSwitchCupDialog(context, state),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white30),
+                                  ),
+                                  child: const Icon(
+                                    Icons.local_cafe_outlined,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.sync_rounded,
+                                      color: Colors.white,
+                                      size: 10,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                        ],
+                      );
+                    },
+                  ),
 
-                const Spacer(flex: 2),
+                  const SizedBox(height: 120),
+                ],
+              ),
+            ),
 
-                // Add Button
-                BlocBuilder<DashboardCubit, DashboardState>(
-                  builder: (context, state) {
-                    return GestureDetector(
-                      onTap: () => context.read<DashboardCubit>().logWater(state.quickAdd1Ml),
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.local_drink_rounded,
-                            color: AppColors.wave3,
-                            size: 40,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                
-                const SizedBox(height: 120), 
-              ],
+            // Undo Button
+            Positioned(
+              right: 24,
+              bottom: 120,
+              child: BlocBuilder<DashboardCubit, DashboardState>(
+                builder: (context, state) {
+                  if (!state.showUndo) return const SizedBox.shrink();
+                  return FloatingActionButton.small(
+                    onPressed: () => context.read<DashboardCubit>().undoLastLog(),
+                    backgroundColor: Colors.white24,
+                    child: const Icon(Icons.undo, color: Colors.white),
+                  );
+                },
+              ),
             ),
-          ),
-          
-          // Undo Button
-          Positioned(
-            right: 24,
-            bottom: 120,
-            child: BlocBuilder<DashboardCubit, DashboardState>(
-              builder: (context, state) {
-                if (!state.showUndo) return const SizedBox.shrink();
-                return FloatingActionButton.small(
-                  onPressed: () => context.read<DashboardCubit>().undoLastLog(),
-                  backgroundColor: Colors.white24,
-                  child: const Icon(Icons.undo, color: Colors.white),
-                );
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  void _showSwitchCupDialog(BuildContext context, DashboardState state) {
+    final sizes = [100, 125, 150, 175, 200, 300, 400];
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          contentPadding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+          title: Text(
+            'Select Cup Size',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.h3.copyWith(color: AppColors.heading),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.maxFinite,
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 2.2,
+                  ),
+                  itemCount: sizes.length + 1,
+                  itemBuilder: (gridCtx, index) {
+                    if (index < sizes.length) {
+                      final ml = sizes[index];
+                      final isSelected = state.quickAdd1Ml == ml;
+
+                      return GestureDetector(
+                        onTap: () {
+                          context.read<DashboardCubit>().updateCupSize(ml);
+                          Navigator.pop(dialogContext);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.primary.withOpacity(0.12) : AppColors.card,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected ? AppColors.primary : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.local_drink_rounded,
+                                color: isSelected ? AppColors.primary : AppColors.body,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$ml ml',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected ? AppColors.primary : AppColors.heading,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      final isCustomSelected = !sizes.contains(state.quickAdd1Ml);
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pop(dialogContext);
+                          _showCustomizeCupDialog(context, state);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isCustomSelected ? AppColors.primary.withOpacity(0.12) : AppColors.card,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isCustomSelected ? AppColors.primary : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.edit_rounded,
+                                color: isCustomSelected ? AppColors.primary : AppColors.body,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Custom',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isCustomSelected ? AppColors.primary : AppColors.heading,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: AppColors.body,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCustomizeCupDialog(BuildContext context, DashboardState state) {
+    final controller = TextEditingController(text: '${state.quickAdd1Ml}');
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          title: Text(
+            'Custom Cup Size',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.h3.copyWith(color: AppColors.heading),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  suffixText: 'ml',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.card),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Cancel', style: TextStyle(color: AppColors.body)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final ml = int.tryParse(controller.text);
+                    if (ml != null && ml > 0) {
+                      context.read<DashboardCubit>().updateCupSize(ml);
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Save', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _onAddWidget(BuildContext context) async {
-    // 1. Mark as added in state (hides button)
     context.read<DashboardCubit>().markWidgetAdded();
 
-    // 2. Platform specific action
     try {
       final widgetService = GetIt.I<WidgetService>();
       await widgetService.requestPinWidget();
-      
-      // On iOS, we show instructions because we can't pin programmatically
+
       if (Theme.of(context).platform == TargetPlatform.iOS) {
         if (context.mounted) {
           _showIOSWidgetGuide(context);
