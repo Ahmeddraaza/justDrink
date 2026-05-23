@@ -529,7 +529,7 @@ class _BasePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 10),
             Image.asset(imagePath, height: 180, fit: BoxFit.contain),
             const SizedBox(height: 24),
             Text(
