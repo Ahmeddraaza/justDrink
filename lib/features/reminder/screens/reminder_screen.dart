@@ -50,7 +50,14 @@ class _ReminderScreenState extends State<ReminderScreen> {
             .toList();
 
         // Calculate next reminder time strictly among the active ones
-        final activeReminders = profile.isPremium ? reminders : reminders.take(6).toList();
+        final baseActiveReminders = profile.isPremium ? reminders : reminders.take(6).toList();
+        
+        // Filter out individually disabled reminders
+        final disabledTimes = PreferencesService.instance.disabledReminderTimes;
+        final activeReminders = baseActiveReminders.where((t) {
+          final timeString = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+          return !disabledTimes.contains(timeString);
+        }).toList();
         
         String nextTime = '--:--';
         final now = TimeOfDay.now();
