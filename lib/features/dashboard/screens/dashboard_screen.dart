@@ -149,19 +149,20 @@ class _DashboardView extends StatelessWidget {
             SafeArea(
               child: Column(
                 children: [
-                  // Top Bar (Centered stack design)
+                  // Top Bar (Centered Row design)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: SizedBox(
                       height: 48,
-                      child: Stack(
-                        alignment: Alignment.center,
+                      child: Row(
                         children: [
-                          Positioned(
-                            left: 0,
-                            child: IconButton(
-                              icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                              onPressed: () => context.push(Routes.settings),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: IconButton(
+                                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                                onPressed: () => context.push(Routes.settings),
+                              ),
                             ),
                           ),
                           BlocBuilder<DashboardCubit, DashboardState>(
@@ -177,74 +178,70 @@ class _DashboardView extends StatelessWidget {
                               );
                             },
                           ),
-                          Positioned(
-                            right: 0,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                BlocBuilder<DashboardCubit, DashboardState>(
-                                  builder: (context, state) {
-                                    if (state.isWidgetAdded) return const SizedBox.shrink();
-                                    return TextButton(
-                                      onPressed: () => _onAddWidget(context),
-                                      style: TextButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                                        minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white24,
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(color: Colors.white30),
-                                        ),
-                                        child: Text(
-                                          '+ WIDGET',
-                                          style: AppTextStyles.bodySmall.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 9,
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  BlocBuilder<DashboardCubit, DashboardState>(
+                                    builder: (context, state) {
+                                      if (state.isWidgetAdded) return const SizedBox.shrink();
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: TextButton(
+                                          onPressed: () => _onAddWidget(context),
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                            minimumSize: Size.zero,
+                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white24,
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(color: Colors.white30),
+                                            ),
+                                            child: Text(
+                                              '+ WIDGET',
+                                              style: AppTextStyles.bodySmall.copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 9,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFFF1C40F), Color(0xFFF39C12)],
+                                      );
+                                    },
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
                                     ),
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.amber.withOpacity(0.3),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 12),
-                                      SizedBox(width: 3),
-                                      Text(
-                                        'PRO',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 9,
-                                          letterSpacing: 0.5,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.workspace_premium_rounded, color: Colors.amber[200], size: 12),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          'PRO',
+                                          style: TextStyle(
+                                            color: Colors.amber[200],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 9,
+                                            letterSpacing: 0.5,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -258,9 +255,7 @@ class _DashboardView extends StatelessWidget {
                   BlocBuilder<DashboardCubit, DashboardState>(
                     builder: (context, state) {
                       final int percentage = ((state.currentIntakeMl / state.dailyGoalMl) * 100).toInt();
-                      final glasses = state.quickAdd1Ml > 0
-                          ? (state.currentIntakeMl / state.quickAdd1Ml).round()
-                          : 0;
+                      final glasses = state.todayLogs.length;
 
                       return Column(
                         children: [
