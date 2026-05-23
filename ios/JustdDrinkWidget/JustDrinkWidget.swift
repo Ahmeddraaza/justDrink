@@ -221,13 +221,13 @@ struct JustDrinkWidgetView: View {
         return CGFloat(entry.currentMl) / CGFloat(entry.goalMl)
     }
 
-    // Dynamic coloring - turning white earlier as requested
+    // Dynamic coloring - turning white later as requested
     var contentColor: Color {
-        fillFraction > 0.50 ? .white : Color(hex: "#1A1C1E")
+        fillFraction > 0.85 ? .white : Color(hex: "#1A1C1E")
     }
     
     var subColor: Color {
-        fillFraction > 0.40 ? .white.opacity(0.85) : Color(hex: "#5DCCFC").opacity(0.95)
+        fillFraction > 0.85 ? .white.opacity(0.85) : Color(hex: "#5DCCFC").opacity(0.95)
     }
 
     var body: some View {
