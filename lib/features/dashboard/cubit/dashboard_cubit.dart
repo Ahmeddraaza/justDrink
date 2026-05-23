@@ -98,7 +98,10 @@ class DashboardCubit extends Cubit<DashboardState> {
   Future<void> updateCupSize(int amountMl) async {
     final profile = await userProfileDao.getProfile();
     if (profile != null) {
-      await userProfileDao.updateQuickAddVolumes(amountMl, profile.quickAdd2Ml);
+      await userProfileDao.updateQuickAddVolumes(
+        quickAdd1Ml: amountMl,
+        quickAdd2Ml: profile.quickAdd2Ml,
+      );
     }
   }
 
