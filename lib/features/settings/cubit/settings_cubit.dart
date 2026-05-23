@@ -95,6 +95,15 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
+  Future<void> updateCupSize(int amountMl) async {
+    if (state.profile != null) {
+      await userProfileDao.updateQuickAddVolumes(
+        quickAdd1Ml: amountMl,
+        quickAdd2Ml: state.profile!.quickAdd2Ml,
+      );
+    }
+  }
+
   @override
   Future<void> close() {
     _profileSubscription?.cancel();

@@ -14,6 +14,7 @@ import '../../../shared/widgets/banner_ad_widget.dart';
 import '../widgets/settings_header.dart';
 import '../widgets/settings_card.dart';
 import '../../../services/widget_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -140,19 +141,19 @@ class _SettingsView extends StatelessWidget {
                 title: 'Custom Log Volumes',
                 subtitle: 'Modify your quick add amounts',
                 icon: Icons.liquor_outlined,
-                onTap: () => context.push(Routes.customVolume),
+                onTap: () => _showSwitchCupDialog(context, profile.quickAdd1Ml),
               ),
               SettingsCard(
                 title: 'Terms & Conditions',
                 subtitle: 'Read our terms of service',
                 icon: Icons.description_outlined,
-                onTap: () => _showTermsDialog(context),
+                onTap: () => _launchURL('https://hanotech.net/terms'),
               ),
               SettingsCard(
                 title: 'Privacy Policy',
                 subtitle: 'View how we handle your data',
                 icon: Icons.privacy_tip_outlined,
-                onTap: () => _showPrivacyDialog(context),
+                onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
               ),
               const SizedBox(height: 32),
               const BannerAdWidget(),
@@ -342,54 +343,159 @@ class _SettingsView extends StatelessWidget {
     );
   }
 
-  void _showTermsDialog(BuildContext context) {
+  Future<void> _launchURL(String urlString) async {
+    final uri = Uri.parse(urlString);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _showSwitchCupDialog(BuildContext context, int currentQuickAddMl) {
+    final sizes = [100, 125, 150, 175, 200, 300, 400];
     showDialog(
       context: context,
-      builder: (dContext) => AlertDialog(
-        title: Text('Terms & Conditions', style: AppTextStyles.h3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: const SingleChildScrollView(
-          child: Text(
-            'Welcome to JustDrink.\n\nBy using our app, you agree to track your hydration responsibly. The daily goal is a general recommendation based on weight, age, and gender, but you should consult a doctor if you have special medical conditions.\n\nAll tracking data is stored strictly on your local device. Enjoy staying hydrated!',
-            style: TextStyle(color: AppColors.body, height: 1.4),
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          contentPadding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+          title: Text(
+            'Select Cup Size',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.h3.copyWith(color: AppColors.heading),
           ),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () => Navigator.pop(dContext),
-            child: const Text('Agree'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.maxFinite,
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 2.2,
+                  ),
+                  itemCount: sizes.length + 1,
+                  itemBuilder: (gridCtx, index) {
+                    if (index < sizes.length) {
+                      final ml = sizes[index];
+                      final isSelected = currentQuickAddMl == ml;
+
+                      return GestureDetector(
+                        onTap: () {
+                          context.read<SettingsCubit>().updateCupSize(ml);
+                          Navigator.pop(dialogContext);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.grey[50],
+                            border: Border.all(
+                              color: isSelected ? AppColors.primary : Colors.grey[200]!,
+                              width: isSelected ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.local_drink_rounded,
+                                size: 16,
+                                color: isSelected ? AppColors.primary : AppColors.body,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${ml}ml',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: isSelected ? AppColors.primary : AppColors.heading,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      // Custom size option
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pop(dialogContext);
+                          _showCustomSizeInput(context);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            border: Border.all(color: Colors.grey[200]!),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Custom',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  void _showPrivacyDialog(BuildContext context) {
+  void _showCustomSizeInput(BuildContext context) {
+    final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (dContext) => AlertDialog(
-        title: Text('Privacy Policy', style: AppTextStyles.h3),
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: const SingleChildScrollView(
-          child: Text(
-            'We value your privacy.\n\nJustDrink does not collect or store any of your personal metrics or water logs on remote servers. All your weights, hydration routines, and habits are stored offline in your private on-device database.\n\nYour data is 100% private and owned entirely by you.',
-            style: TextStyle(color: AppColors.body, height: 1.4),
+        title: Text('Custom Size', style: AppTextStyles.h3),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(
+            suffixText: 'ml',
+            border: UnderlineInputBorder(),
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
           ),
         ),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.body)),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: () => Navigator.pop(dContext),
-            child: const Text('Close'),
+            onPressed: () {
+              final val = int.tryParse(controller.text);
+              if (val != null && val > 0) {
+                context.read<SettingsCubit>().updateCupSize(val);
+                Navigator.pop(dialogCtx);
+              }
+            },
+            child: const Text('Save'),
           ),
         ],
       ),
