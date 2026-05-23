@@ -15,6 +15,7 @@ import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
 import 'package:flutter/services.dart';
 import '../../../shared/widgets/floating_navbar.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../services/widget_service.dart';
 
@@ -265,18 +266,18 @@ class _DashboardView extends StatelessWidget {
                             children: [
                               Text(
                                 '$percentage',
-                                style: const TextStyle(
+                                style: GoogleFonts.roboto(
                                   fontSize: 100,
                                   fontWeight: FontWeight.w900,
                                   color: Colors.white,
                                   height: 1,
                                 ),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.only(top: 20),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20),
                                 child: Text(
                                   '%',
-                                  style: TextStyle(
+                                  style: GoogleFonts.roboto(
                                     fontSize: 32,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white70,
