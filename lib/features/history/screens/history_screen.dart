@@ -12,6 +12,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/water_log_dao.dart';
 import '../../../shared/widgets/banner_ad_widget.dart';
+import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
 import '../../../shared/widgets/floating_navbar.dart';
 
 class HistoryScreen extends StatelessWidget {
@@ -22,6 +23,7 @@ class HistoryScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => HistoryCubit(
         waterLogDao: GetIt.I<WaterLogDao>(),
+        widgetSyncCubit: context.read<WidgetSyncCubit>(),
       )..initialize(),
       child: const _HistoryView(),
     );
@@ -37,7 +39,7 @@ class _HistoryView extends StatelessWidget {
       backgroundColor: Colors.white,
       extendBody: true,
       appBar: AppBar(
-        title: Text('Statistics', style: AppTextStyles.h2.copyWith(color: AppColors.heading)),
+        title: Text('Insights', style: AppTextStyles.h2.copyWith(color: AppColors.heading)),
         elevation: 0,
         backgroundColor: Colors.white,
         centerTitle: true,
@@ -45,12 +47,8 @@ class _HistoryView extends StatelessWidget {
           icon: const Icon(Icons.menu, color: AppColors.heading),
           onPressed: () => context.push(Routes.settings),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined, color: AppColors.heading),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
+        actions: const [
+          SizedBox(width: 48),
         ],
       ),
       bottomNavigationBar: Column(
@@ -70,8 +68,11 @@ class _HistoryView extends StatelessWidget {
               ? state.weeklyTotals.last.totalMl 
               : 0;
 
+          // Only display the 3 most recent logs under activity log
+          final displayedLogs = state.selectedDayLogs.take(3).toList();
+
           return RefreshIndicator(
-            onRefresh: () => context.read<HistoryCubit>().refresh(),
+            onRefresh: () async => context.read<HistoryCubit>().refreshTotals(),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 120),
               children: [
@@ -95,16 +96,17 @@ class _HistoryView extends StatelessWidget {
                       'Activity Logs',
                       style: AppTextStyles.h3.copyWith(color: AppColors.heading),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'View All',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
+                    if (state.selectedDayLogs.length > 3)
+                      TextButton(
+                        onPressed: () => _showAllLogsBottomSheet(context, state),
+                        child: Text(
+                          'View All',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -124,16 +126,100 @@ class _HistoryView extends StatelessWidget {
                       ),
                     ),
                   )
-                else
-                  ...state.selectedDayLogs.map((log) => LogEntryTile(
+                else ...[
+                  ...displayedLogs.map((log) => LogEntryTile(
                         log: log,
                         onDelete: () => context.read<HistoryCubit>().deleteLog(log.id),
                       )),
+                  if (state.selectedDayLogs.length > 3)
+                    Center(
+                      child: TextButton(
+                        onPressed: () => _showAllLogsBottomSheet(context, state),
+                        child: Text(
+                          'And ${state.selectedDayLogs.length - 3} more logs',
+                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                ],
               ],
             ),
           );
         },
       ),
+    );
+  }
+
+  void _showAllLogsBottomSheet(BuildContext context, HistoryState state) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (modalContext) {
+        return BlocProvider.value(
+          value: context.read<HistoryCubit>(),
+          child: BlocBuilder<HistoryCubit, HistoryState>(
+            builder: (context, state) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'All Logs (${state.selectedDayLogs.length})',
+                          style: AppTextStyles.h3.copyWith(color: AppColors.heading),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(modalContext),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    if (state.selectedDayLogs.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(child: Text('No logs recorded')),
+                      )
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: state.selectedDayLogs.length,
+                          itemBuilder: (context, index) {
+                            final log = state.selectedDayLogs[index];
+                            return LogEntryTile(
+                              log: log,
+                              onDelete: () {
+                                context.read<HistoryCubit>().deleteLog(log.id);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

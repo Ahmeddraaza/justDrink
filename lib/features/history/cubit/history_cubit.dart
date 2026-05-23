@@ -1,44 +1,63 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'history_state.dart';
 import '../../../data/database/daos/water_log_dao.dart';
+import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
 
 class HistoryCubit extends Cubit<HistoryState> {
   final WaterLogDao waterLogDao;
+  final WidgetSyncCubit widgetSyncCubit;
+  StreamSubscription? _logsSubscription;
 
-  HistoryCubit({required this.waterLogDao})
-      : super(HistoryState(selectedDate: DateTime.now()));
+  HistoryCubit({
+    required this.waterLogDao,
+    required this.widgetSyncCubit,
+  }) : super(HistoryState(selectedDate: DateTime.now()));
 
-  Future<void> initialize() async {
+  void initialize() {
     emit(state.copyWith(isLoading: true));
-    await refresh();
+    _subscribeToLogs();
     emit(state.copyWith(isLoading: false));
   }
 
-  Future<void> refresh() async {
+  void _subscribeToLogs() {
+    _logsSubscription?.cancel();
+    _logsSubscription = waterLogDao.watchLogsForDate(state.selectedDate).listen((logs) {
+      emit(state.copyWith(selectedDayLogs: logs));
+    });
+    refreshTotals();
+  }
+
+  Future<void> refreshTotals() async {
     final List<DailyTotal> totals;
     if (state.period == HistoryPeriod.monthly) {
       totals = await waterLogDao.getLast30DaysTotals();
     } else {
       totals = await waterLogDao.getLast7DaysTotals();
     }
-    final logs = await waterLogDao.getLogsForDate(state.selectedDate);
-    emit(state.copyWith(weeklyTotals: totals, selectedDayLogs: logs));
+    emit(state.copyWith(weeklyTotals: totals));
   }
 
   Future<void> changePeriod(HistoryPeriod period) async {
     emit(state.copyWith(isLoading: true, period: period));
-    await refresh();
+    await refreshTotals();
     emit(state.copyWith(isLoading: false));
   }
 
-  Future<void> selectDate(DateTime date) async {
-    emit(state.copyWith(isLoading: true, selectedDate: date));
-    final logs = await waterLogDao.getLogsForDate(date);
-    emit(state.copyWith(selectedDayLogs: logs, isLoading: false));
+  void selectDate(DateTime date) {
+    emit(state.copyWith(selectedDate: date));
+    _subscribeToLogs();
   }
 
   Future<void> deleteLog(int id) async {
     await waterLogDao.deleteLogById(id);
-    await refresh();
+    widgetSyncCubit.sync();
+    await refreshTotals();
+  }
+
+  @override
+  Future<void> close() {
+    _logsSubscription?.cancel();
+    return super.close();
   }
 }

@@ -8,6 +8,7 @@ import '../../../shared/widgets/floating_navbar.dart';
 import '../../../core/constants/route_constants.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../data/database/app_database.dart';
+import '../../../data/preferences/preferences_service.dart';
 import '../../../core/utils/notification_scheduler.dart';
 import '../../../services/notification_service.dart';
 import '../widgets/reminder_header.dart';
@@ -108,12 +109,17 @@ class ReminderScreen extends StatelessWidget {
                 final index = entry.key;
                 final time = entry.value;
                 final isLocked = !profile.isPremium && index >= 6;
+                
+                final hourStr = time.hour.toString().padLeft(2, '0');
+                final minStr = time.minute.toString().padLeft(2, '0');
+                final timeString = '$hourStr:$minStr';
+                final isTileDisabled = PreferencesService.instance.disabledReminderTimes.contains(timeString);
 
                 return ReminderTile(
                   time: time,
-                  isActive: profile.remindersEnabled && !isLocked,
+                  isActive: profile.remindersEnabled && !isLocked && !isTileDisabled,
                   isLocked: isLocked,
-                  onToggle: (val) => _toggleReminders(context, val),
+                  onToggle: (val) => _toggleSingleReminder(context, time, val),
                   onTap: () {
                     if (isLocked) {
                       context.push(Routes.paywall);
@@ -135,6 +141,30 @@ class ReminderScreen extends StatelessWidget {
     final updatedProfile = await GetIt.I<UserProfileDao>().getProfile();
     if (updatedProfile != null) {
       await GetIt.I<NotificationService>().rescheduleAll(updatedProfile);
+    }
+  }
+
+  Future<void> _toggleSingleReminder(BuildContext context, TimeOfDay time, bool enabled) async {
+    final hourStr = time.hour.toString().padLeft(2, '0');
+    final minStr = time.minute.toString().padLeft(2, '0');
+    final timeString = '$hourStr:$minStr';
+    
+    final prefs = PreferencesService.instance;
+    final currentDisabled = List<String>.from(prefs.disabledReminderTimes);
+    
+    if (enabled) {
+      currentDisabled.remove(timeString);
+    } else {
+      if (!currentDisabled.contains(timeString)) {
+        currentDisabled.add(timeString);
+      }
+    }
+    
+    await prefs.setDisabledReminderTimes(currentDisabled);
+    
+    final profile = await GetIt.I<UserProfileDao>().getProfile();
+    if (profile != null) {
+      await GetIt.I<NotificationService>().rescheduleAll(profile);
     }
   }
 

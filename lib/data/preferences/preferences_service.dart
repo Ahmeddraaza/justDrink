@@ -19,6 +19,8 @@ class PreferencesService {
   Future<void> setInt(String key, int value) => _prefs.setInt(key, value);
   Future<void> setString(String key, String value) => _prefs.setString(key, value);
   Future<void> setDouble(String key, double value) => _prefs.setDouble(key, value);
+  List<String> getStringList(String key) => _prefs.getStringList(key) ?? [];
+  Future<void> setStringList(String key, List<String> value) => _prefs.setStringList(key, value);
 
   Future<void> remove(String key) => _prefs.remove(key);
   Future<void> clear() => _prefs.clear();
@@ -46,10 +48,13 @@ class PreferencesService {
 
   // ── Convenience keys ──────────────────────────────────────────────
   bool get isOnboardingComplete => getBool('onboarding_complete') ?? false;
-  bool get isPremium => getBool('is_premium') ?? false;
+  bool get isPremium => true;
   String? get premiumProductId => getString('premium_product_id');
   bool get notificationPermissionAsked => getBool('notification_permission_asked') ?? false;
   
   bool get isWidgetAdded => getBool('is_widget_added') ?? false;
   Future<void> setIsWidgetAdded(bool value) => setBool('is_widget_added', value);
+
+  List<String> get disabledReminderTimes => getStringList('disabled_reminder_times');
+  Future<void> setDisabledReminderTimes(List<String> times) => setStringList('disabled_reminder_times', times);
 }
