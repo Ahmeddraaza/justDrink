@@ -19,7 +19,10 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   void initState() {
     super.initState();
-    _loadAd();
+    final isPremium = context.read<AdCubit>().state.isPremium;
+    if (!isPremium) {
+      _loadAd();
+    }
   }
 
   void _loadAd() {

@@ -95,6 +95,13 @@ class DashboardCubit extends Cubit<DashboardState> {
     emit(state.copyWith(isWidgetAdded: true));
   }
 
+  Future<void> updateCupSize(int amountMl) async {
+    final profile = await userProfileDao.getProfile();
+    if (profile != null) {
+      await userProfileDao.updateQuickAddVolumes(amountMl, profile.quickAdd2Ml);
+    }
+  }
+
   @override
   Future<void> close() {
     _totalSubscription?.cancel();

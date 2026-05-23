@@ -47,7 +47,7 @@ class FloatingNavbar extends StatelessWidget {
             ),
             _NavItem(
               icon: Icons.history_rounded,
-              label: 'History',
+              label: 'Insights',
               active: activeRoute == Routes.history,
               onTap: () => _navigate(context, Routes.history),
             ),

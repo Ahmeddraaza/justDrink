@@ -63,6 +63,17 @@ class WaterLogDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  // WATCH all logs for a specific date
+  Stream<List<WaterLog>> watchLogsForDate(DateTime date) {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    return (select(waterLogs)
+          ..where((t) => t.loggedAt.isBiggerOrEqualValue(start))
+          ..where((t) => t.loggedAt.isSmallerThanValue(end))
+          ..orderBy([(t) => OrderingTerm.desc(t.loggedAt)]))
+        .watch();
+  }
+
   // GET last 7 days daily totals — returns list of (date, totalMl)
   Future<List<DailyTotal>> getLast7DaysTotals() async {
     final now = DateTime.now();
