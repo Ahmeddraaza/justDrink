@@ -227,7 +227,7 @@ struct JustDrinkWidgetView: View {
     }
     
     var subColor: Color {
-        fillFraction > 0.85 ? .white.opacity(0.85) : Color(hex: "#5DCCFC").opacity(0.95)
+        fillFraction > 0.85 ? .white.opacity(0.85) : Color(hex: "#1A1C1E").opacity(0.7)
     }
 
     var body: some View {
