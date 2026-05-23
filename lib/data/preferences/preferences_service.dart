@@ -48,7 +48,7 @@ class PreferencesService {
 
   // ── Convenience keys ──────────────────────────────────────────────
   bool get isOnboardingComplete => getBool('onboarding_complete') ?? false;
-  bool get isPremium => true;
+  bool get isPremium => getBool('is_premium') ?? false;
   String? get premiumProductId => getString('premium_product_id');
   bool get notificationPermissionAsked => getBool('notification_permission_asked') ?? false;
   
