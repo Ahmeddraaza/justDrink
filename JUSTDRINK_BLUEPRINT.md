@@ -1171,7 +1171,7 @@ class NotificationService {
       final time = times[i];
       await _plugin.zonedSchedule(
         i,
-        'JustDrink 💧',
+        'JustDrink',
         notificationText,
         time,
         NotificationDetails(
@@ -1255,7 +1255,7 @@ class NotificationService {
         );
         await plugin.zonedSchedule(
           notifId + 1000, // offset to avoid collision
-          'JustDrink 💧',
+          'JustDrink',
           'Time to drink water! (Snoozed)',
           snoozeTime,
           const NotificationDetails(
