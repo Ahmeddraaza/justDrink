@@ -100,7 +100,7 @@ class NotificationService {
 
       await _plugin.zonedSchedule(
         i,
-        'JustDrink 💧',
+        'JustDrink',
         notificationText,
         time,
         NotificationDetails(
