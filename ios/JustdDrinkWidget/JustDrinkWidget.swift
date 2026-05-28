@@ -15,7 +15,7 @@ struct LogWaterIntent: AppIntent {
         let glassSize  = defaults?.integer(forKey: "glassSize")   ?? 250
         let goalMl     = defaults?.integer(forKey: "goalMl")      ?? 2500
 
-        let newMl      = min(currentMl + glassSize, goalMl)
+        let newMl      = currentMl + glassSize
         let newGlasses = newMl / max(glassSize, 1)
         let newProgress = Double(newMl) / Double(max(goalMl, 1))
 
@@ -332,7 +332,7 @@ struct JustDrinkWidgetView: View {
                     .padding(.top, 20)
                     .padding(.bottom, 16)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: geo.size.width, height: geo.size.height)
                 .widgetBackground(Color.white)
                 .ignoresSafeArea()
             }
