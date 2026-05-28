@@ -289,6 +289,7 @@ struct JustDrinkWidgetView: View {
                             Spacer()
                         }
                     }
+                    }
 
                     // Elegant Information Layout
                     VStack(alignment: .leading, spacing: 0) {
