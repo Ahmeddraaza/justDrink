@@ -19,9 +19,10 @@ import 'data/database/daos/user_profile_dao.dart';
 
 
 
-// Screens - Placeholder stubs for now to avoid compilation errors
 import 'features/splash/screens/splash_screen.dart';
 import 'features/onboarding/screens/onboarding_intro_screen.dart';
+import 'features/onboarding/screens/onboarding_step2_screen.dart';
+import 'features/onboarding/screens/onboarding_step3_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/history/screens/history_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
@@ -93,5 +94,13 @@ final _router = GoRouter(
     GoRoute(path: Routes.paywall,         builder: (c,s) => const PaywallScreen()),
     GoRoute(path: Routes.customVolume,    builder: (c,s) => const CustomVolumeEditScreen()),
     GoRoute(path: Routes.customNotifText, builder: (c,s) => const CustomNotificationTextScreen()),
+    GoRoute(
+      path: Routes.onboardingStep2,
+      builder: (c, s) => OnboardingStep2Screen(cubit: s.extra as OnboardingCubit),
+    ),
+    GoRoute(
+      path: Routes.onboardingStep3,
+      builder: (c, s) => OnboardingStep3Screen(cubit: s.extra as OnboardingCubit),
+    ),
   ],
 );

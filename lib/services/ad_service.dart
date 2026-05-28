@@ -1,8 +1,6 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../core/constants/app_constants.dart';
 
-import 'dart:io';
-
 class AdService {
   BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;

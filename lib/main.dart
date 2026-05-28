@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -6,7 +5,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:get_it/get_it.dart';
 
-import 'core/di/injection.dart';
 import 'data/preferences/preferences_service.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
@@ -38,7 +36,9 @@ void main() async {
   final notificationService = NotificationService();
   try {
     await notificationService.initialize().timeout(const Duration(seconds: 5));
-  } catch (e) {}
+  } catch (e) {
+    debugPrint('Notification init failed: $e');
+  }
 
   final widgetService = WidgetService();
   await widgetService.initialize();
@@ -46,12 +46,16 @@ void main() async {
   final adService = AdService();
   try {
     await adService.initialize().timeout(const Duration(seconds: 3));
-  } catch (e) {}
+  } catch (e) {
+    debugPrint('Ad service init failed: $e');
+  }
 
   final purchaseService = PurchaseService();
   try {
     await purchaseService.initialize().timeout(const Duration(seconds: 3));
-  } catch (e) {}
+  } catch (e) {
+    debugPrint('Purchase service init failed: $e');
+  }
 
   final sl = GetIt.instance;
   DatabaseService.registerWithGetIt(sl);
