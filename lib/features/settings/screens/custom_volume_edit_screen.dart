@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../services/notification_service.dart';
 import '../../../data/preferences/preferences_service.dart';

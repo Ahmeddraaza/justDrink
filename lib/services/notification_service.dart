@@ -1,10 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:drift/drift.dart';
 import '../core/constants/notification_constants.dart';
 import '../core/utils/notification_scheduler.dart';
 import '../data/database/app_database.dart';
-import '../data/database/daos/user_profile_dao.dart';
 import '../data/preferences/preferences_service.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:flutter/foundation.dart';

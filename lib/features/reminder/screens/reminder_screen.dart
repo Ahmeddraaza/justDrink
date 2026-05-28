@@ -148,13 +148,6 @@ class _ReminderScreenState extends State<ReminderScreen> {
     );
   }
 
-  Future<void> _toggleReminders(BuildContext context, bool enabled) async {
-    await GetIt.I<UserProfileDao>().updateRemindersEnabled(enabled);
-    final updatedProfile = await GetIt.I<UserProfileDao>().getProfile();
-    if (updatedProfile != null) {
-      await GetIt.I<NotificationService>().rescheduleAll(updatedProfile);
-    }
-  }
 
   Future<void> _toggleSingleReminder(BuildContext context, TimeOfDay time, bool enabled) async {
     final hourStr = time.hour.toString().padLeft(2, '0');

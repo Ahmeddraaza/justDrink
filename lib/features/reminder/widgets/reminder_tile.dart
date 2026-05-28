@@ -22,7 +22,7 @@ class ReminderTile extends StatelessWidget {
   Widget build(BuildContext context) {
     const backgroundColor = Colors.white;
     const textColor = AppColors.heading;
-    final subTextColor = isLocked ? AppColors.primary : AppColors.body.withOpacity(0.8);
+    final subTextColor = isLocked ? AppColors.primary : AppColors.body.withValues(alpha: 0.8);
     final iconColor = isLocked
         ? AppColors.primary
         : (isActive ? AppColors.primary : AppColors.body);
@@ -34,13 +34,13 @@ class ReminderTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(
-          color: isLocked ? AppColors.primary.withOpacity(0.3) : AppColors.card,
+          color: isLocked ? AppColors.primary.withValues(alpha: 0.3) : AppColors.card,
           width: 1.5,
         ),
       ),
@@ -57,7 +57,7 @@ class ReminderTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.15),
+                    color: iconColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -104,8 +104,8 @@ class ReminderTile extends StatelessWidget {
                   Switch.adaptive(
                     value: isActive,
                     onChanged: onToggle,
-                    activeTrackColor: AppColors.heading,
-                    activeColor: Colors.white,
+                    activeTrackColor: AppColors.primary,
+                    activeThumbColor: Colors.white,
                   ),
               ],
             ),

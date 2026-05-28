@@ -1,9 +1,5 @@
 import 'package:get_it/get_it.dart';
 import '../../services/database_service.dart';
-import '../../services/notification_service.dart';
-import '../../services/widget_service.dart';
-import '../../services/purchase_service.dart';
-import '../../services/ad_service.dart';
 import '../../data/preferences/preferences_service.dart';
 
 final sl = GetIt.instance;
