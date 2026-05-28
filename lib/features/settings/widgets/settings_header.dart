@@ -31,7 +31,7 @@ class SettingsHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: AppColors.dashboardBackground.withOpacity(0.3),
+            color: AppColors.dashboardBackground.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -45,7 +45,7 @@ class SettingsHeader extends StatelessWidget {
             child: Icon(
               isPremium ? Icons.workspace_premium_outlined : Icons.person_outline,
               size: 100,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
             ),
           ),
           Column(
@@ -65,9 +65,9 @@ class SettingsHeader extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.2),
+                        color: Colors.amber.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber.withOpacity(0.5)),
+                        border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
                       ),
                       child: Text(
                         'PRO',
@@ -100,7 +100,7 @@ class SettingsHeader extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(

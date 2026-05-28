@@ -1,9 +1,6 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../core/constants/app_constants.dart';
 
-import 'dart:io';
-import 'package:app_tracking_transparency/app_tracking_transparency.dart';
-
 class AdService {
   BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;
@@ -16,38 +13,9 @@ class AdService {
   Function()? onInterstitialClosed;
 
   Future<void> initialize() async {
-    if (Platform.isIOS) {
-      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-      if (status == TrackingStatus.notDetermined) {
-        await AppTrackingTransparency.requestTrackingAuthorization();
-      }
-    }
-
-    // Request GDPR Consent via UMP
-    final params = ConsentRequestParameters();
-    ConsentInformation.instance.requestConsentInfoUpdate(
-      params,
-      () async {
-        if (await ConsentInformation.instance.isConsentFormAvailable()) {
-          ConsentForm.loadConsentForm(
-            (ConsentForm consentForm) async {
-              var status = await ConsentInformation.instance.consentStatus;
-              if (status == ConsentStatus.required) {
-                consentForm.show(
-                  (FormError? formError) async {
-                    // Consent gathered
-                  },
-                );
-              }
-            },
-            (FormError formError) {},
-          );
-        }
-      },
-      (FormError formError) {},
-    );
-
-    await MobileAds.instance.initialize();
+    // Completely bypass AdMob initialization for the ad-free builds
+    // to ensure Apple does not flag the app for tracking or missing ATT prompts.
+    return;
   }
 
   // ── Banner Ad ─────────────────────────────────────────────────────

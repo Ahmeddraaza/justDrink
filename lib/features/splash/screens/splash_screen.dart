@@ -34,13 +34,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _navigateToNext() async {
-    print('Waiting 3 seconds...');
     await Future.delayed(const Duration(seconds: 3));
-    print('Navigating to next screen...');
-    if (!mounted) {
-      print('Not mounted!');
-      return;
-    }
+    if (!mounted) return;
 
     final prefs = GetIt.I<PreferencesService>();
     if (!prefs.isOnboardingComplete) {
@@ -96,7 +91,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     'Stay hydrated and track your daily water intake',
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ),

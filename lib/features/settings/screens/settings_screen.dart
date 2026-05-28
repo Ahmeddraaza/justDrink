@@ -93,7 +93,7 @@ class _SettingsView extends StatelessWidget {
                 trailing: Switch.adaptive(
                   value: profile.remindersEnabled,
                   onChanged: (val) => context.read<SettingsCubit>().toggleReminders(val),
-                  activeColor: AppColors.primary,
+                  activeTrackColor: AppColors.primary,
                 ),
               ),
               SettingsCard(
@@ -161,7 +161,7 @@ class _SettingsView extends StatelessWidget {
               Center(
                 child: Text(
                   'Version 1.0.0',
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.body.withOpacity(0.5)),
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.body.withValues(alpha: 0.5)),
                 ),
               ),
             ],
@@ -174,12 +174,11 @@ class _SettingsView extends StatelessWidget {
   void _onAddWidget(BuildContext context) async {
     try {
       final widgetService = GetIt.I<WidgetService>();
+      final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
       await widgetService.requestPinWidget();
       
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
-        if (context.mounted) {
-          _showIOSWidgetGuide(context);
-        }
+      if (isIOS && context.mounted) {
+        _showIOSWidgetGuide(context);
       }
     } catch (e) {
       debugPrint('Error pinning widget: $e');
