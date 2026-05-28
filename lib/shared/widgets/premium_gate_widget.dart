@@ -28,7 +28,7 @@ class PremiumGateWidget extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => context.push(Routes.paywall),
+                    // onTap: () => context.push(Routes.paywall),
                     child: Container(
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 16),

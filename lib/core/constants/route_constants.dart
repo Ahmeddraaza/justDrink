@@ -7,7 +7,7 @@ class Routes {
   static const reminder          = '/reminder';
   static const history           = '/history';
   static const settings          = '/settings';
-  static const paywall           = '/paywall';
+  // static const paywall           = '/paywall';
   static const customVolume      = '/settings/custom-volume';
   static const customNotifText   = '/settings/custom-notification';
 }

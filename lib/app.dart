@@ -26,7 +26,7 @@ import 'features/onboarding/screens/onboarding_step3_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/history/screens/history_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
-import 'features/paywall/screens/paywall_screen.dart';
+// import 'features/paywall/screens/paywall_screen.dart';
 import 'features/settings/screens/custom_volume_edit_screen.dart';
 import 'features/settings/screens/custom_notification_text_screen.dart';
 import 'features/reminder/screens/reminder_screen.dart';
@@ -91,7 +91,7 @@ final _router = GoRouter(
     GoRoute(path: Routes.reminder,        builder: (c,s) => const ReminderScreen()),
     GoRoute(path: Routes.history,         builder: (c,s) => const HistoryScreen()),
     GoRoute(path: Routes.settings,        builder: (c,s) => const SettingsScreen()),
-    GoRoute(path: Routes.paywall,         builder: (c,s) => const PaywallScreen()),
+    // GoRoute(path: Routes.paywall,         builder: (c,s) => const PaywallScreen()),
     GoRoute(path: Routes.customVolume,    builder: (c,s) => const CustomVolumeEditScreen()),
     GoRoute(path: Routes.customNotifText, builder: (c,s) => const CustomNotificationTextScreen()),
     GoRoute(

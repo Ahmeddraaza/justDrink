@@ -60,7 +60,7 @@ class _SettingsView extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
             children: [
               GestureDetector(
-                onTap: profile.isPremium ? null : () => context.push(Routes.paywall),
+                // onTap: profile.isPremium ? null : () => context.push(Routes.paywall),
                 child: SettingsHeader(
                   dailyGoal: profile.dailyGoalMl,
                   weight: profile.weightKg,
@@ -181,7 +181,7 @@ class _SettingsView extends StatelessWidget {
         _showIOSWidgetGuide(context);
       }
     } catch (e) {
-      debugPrint('Error pinning widget: $e');
+      // Error logging removed for production
     }
   }
 

@@ -44,7 +44,7 @@ class NotificationService {
         onDidReceiveBackgroundNotificationResponse: _onBackgroundNotificationResponse,
       ).timeout(const Duration(seconds: 5));
     } catch (e) {
-      debugPrint('Notification plugin initialization failed or timed out: $e');
+      // Error logging removed for production
     }
   }
 

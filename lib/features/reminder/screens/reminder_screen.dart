@@ -134,7 +134,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                   onToggle: (val) => _toggleSingleReminder(context, time, val),
                   onTap: () {
                     if (isLocked) {
-                      context.push(Routes.paywall);
+                      // context.push(Routes.paywall);
                     } else {
                       _showRoutineGuide(context);
                     }

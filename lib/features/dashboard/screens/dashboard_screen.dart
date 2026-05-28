@@ -620,7 +620,7 @@ class _DashboardView extends StatelessWidget {
         }
       }
     } catch (e) {
-      debugPrint('Error pinning widget: $e');
+      // Error logging removed for production
     }
   }
 
