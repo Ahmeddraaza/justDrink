@@ -214,6 +214,7 @@ struct WaveShape: Shape {
 
 // MARK: - Widget View
 struct JustDrinkWidgetView: View {
+    @Environment(\.widgetFamily) var family
     let entry: WaterEntry
 
     var fillFraction: CGFloat {
@@ -258,6 +259,7 @@ struct JustDrinkWidgetView: View {
                     }
 
                     // Logo Image from Assets
+                    if family != .systemSmall {
                     HStack {
                         Spacer()
                         VStack {
@@ -292,13 +294,15 @@ struct JustDrinkWidgetView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 1) {
                             Text(entry.date, style: .time)
-                                .font(.system(size: 32, weight: .black, design: .rounded))
+                                .font(.system(size: family == .systemSmall ? 26 : 32, weight: .black, design: .rounded))
                                 .foregroundColor(contentColor)
                                 .tracking(-0.5)
 
                             // Show glass count in stats
                             Text("\(entry.currentMl)ml / \(entry.goalMl)ml (\(entry.glassesCount) Glass)")
-                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .font(.system(size: family == .systemSmall ? 11 : 13, weight: .bold, design: .rounded))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
                                 .foregroundColor(subColor)
                         }
 
@@ -310,11 +314,11 @@ struct JustDrinkWidgetView: View {
                                 Image(systemName: "plus")
                                     .font(.system(size: 11, weight: .bold))
                                 Text("Add Glass")
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .font(.system(size: family == .systemSmall ? 11 : 13, weight: .bold, design: .rounded))
                             }
                             .foregroundColor(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
+                            .padding(.horizontal, family == .systemSmall ? 10 : 14)
+                            .padding(.vertical, family == .systemSmall ? 6 : 8)
                             .background(
                                 ZStack {
                                     Capsule()
@@ -328,9 +332,9 @@ struct JustDrinkWidgetView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 16)
+                    .padding(.horizontal, family == .systemSmall ? 12 : 20)
+                    .padding(.top, family == .systemSmall ? 12 : 20)
+                    .padding(.bottom, family == .systemSmall ? 12 : 16)
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
                 .widgetBackground(Color.white)
