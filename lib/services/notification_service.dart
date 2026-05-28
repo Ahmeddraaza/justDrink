@@ -13,7 +13,7 @@ class NotificationService {
 
   // ── Initialization ──────────────────────────────────────────────────
   Future<void> initialize() async {
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
 
     // iOS: Register action categories here
     final iosInit = DarwinInitializationSettings(
