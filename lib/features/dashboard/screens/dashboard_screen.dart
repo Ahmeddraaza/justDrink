@@ -191,7 +191,13 @@ class _DashboardView extends StatelessWidget {
                                       return Padding(
                                         padding: const EdgeInsets.only(right: 8),
                                         child: TextButton(
-                                          onPressed: () => _onAddWidget(context),
+                                          onPressed: () {
+                                            if (state.isPremium) {
+                                              _onAddWidget(context);
+                                            } else {
+                                              context.push(Routes.paywall);
+                                            }
+                                          },
                                           style: TextButton.styleFrom(
                                             padding: EdgeInsets.zero,
                                             minimumSize: Size.zero,
@@ -217,29 +223,34 @@ class _DashboardView extends StatelessWidget {
                                       );
                                     },
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.workspace_premium_rounded, color: Colors.amber[200], size: 12),
-                                        const SizedBox(width: 3),
-                                        Text(
-                                          'PRO',
-                                          style: TextStyle(
-                                            color: Colors.amber[200],
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 9,
-                                            letterSpacing: 0.5,
-                                          ),
+                                  BlocBuilder<DashboardCubit, DashboardState>(
+                                    builder: (context, state) {
+                                      if (!state.isPremium) return const SizedBox.shrink();
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(10),
+                                          border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
                                         ),
-                                      ],
-                                    ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.workspace_premium_rounded, color: Colors.amber[200], size: 12),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              'PRO',
+                                              style: TextStyle(
+                                                color: Colors.amber[200],
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 9,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
@@ -486,7 +497,11 @@ class _DashboardView extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           Navigator.pop(dialogContext);
-                          _showCustomizeCupDialog(context, state);
+                          if (state.isPremium) {
+                            _showCustomizeCupDialog(context, state);
+                          } else {
+                            context.push(Routes.paywall);
+                          }
                         },
                         child: Container(
                           decoration: BoxDecoration(

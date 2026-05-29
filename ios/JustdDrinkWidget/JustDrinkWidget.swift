@@ -38,12 +38,13 @@ struct WaterEntry: TimelineEntry {
     let goalMl: Int
     let glassSize: Int
     let glassesCount: Int
+    let isPremium: Bool
 }
 
 // MARK: - Timeline Provider
 struct WaterProvider: TimelineProvider {
     func placeholder(in context: Context) -> WaterEntry {
-        WaterEntry(date: Date(), currentMl: 500, goalMl: 2500, glassSize: 250, glassesCount: 2)
+        WaterEntry(date: Date(), currentMl: 500, goalMl: 2500, glassSize: 250, glassesCount: 2, isPremium: true)
     }
     func getSnapshot(in context: Context, completion: @escaping (WaterEntry) -> Void) {
         completion(currentEntry())
@@ -59,7 +60,8 @@ struct WaterProvider: TimelineProvider {
             currentMl:   d?.integer(forKey: "currentMl")   ?? 0,
             goalMl:      d?.integer(forKey: "goalMl")       ?? 2500,
             glassSize:   d?.integer(forKey: "glassSize")    ?? 250,
-            glassesCount:d?.integer(forKey: "glassesCount") ?? 0
+            glassesCount:d?.integer(forKey: "glassesCount") ?? 0,
+            isPremium:   d?.bool(forKey: "isPremium")       ?? false
         )
     }
 }
@@ -232,6 +234,27 @@ struct JustDrinkWidgetView: View {
     }
 
     var body: some View {
+        if !entry.isPremium {
+            GeometryReader { geo in
+                ZStack {
+                    Color(hex: "#1A365D")
+                    VStack(spacing: 8) {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: family == .systemSmall ? 24 : 28))
+                            .foregroundColor(.yellow)
+                        Text("Premium Widget")
+                            .font(.system(size: family == .systemSmall ? 12 : 14, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("Open app to unlock")
+                            .font(.system(size: family == .systemSmall ? 10 : 12, design: .rounded))
+                            .foregroundColor(.white.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 10)
+                    }
+                }
+                .widgetBackground(Color(hex: "#1A365D"))
+            }
+        } else {
         PhaseAnimator([0.0, .pi * 2]) { phase in
             GeometryReader { geo in
                 ZStack(alignment: .bottomLeading) {
@@ -343,6 +366,7 @@ struct JustDrinkWidgetView: View {
             }
         } animation: { _ in
             .linear(duration: 4.5)
+        }
         }
     }
 }

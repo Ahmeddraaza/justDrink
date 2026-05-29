@@ -26,6 +26,7 @@ class WidgetService {
     await HomeWidget.saveWidgetData<int>('goalMl', goalMl);
     await HomeWidget.saveWidgetData<int>('glassSize', glassSize);
     await HomeWidget.saveWidgetData<int>('glassesCount', (currentMl / glassSize).floor());
+    await HomeWidget.saveWidgetData<bool>('isPremium', isPremium);
     await HomeWidget.saveWidgetData<String>('theme', isPremium ? theme : 'default');
     await HomeWidget.saveWidgetData<double>(
       'progress',
@@ -92,7 +93,7 @@ Future<void> _widgetBackgroundCallback(Uri? uri) async {
           : 0.0,
     );
     await HomeWidget.updateWidget(
-      androidName: 'com.justdrink.app.JustDrinkWidgetProvider',
+      androidName: 'com.hanotech.justdrinkfreemium.JustDrinkWidgetProvider',
       iOSName: 'JustDrinkWidget',
     );
   }

@@ -126,22 +126,46 @@ class _SettingsView extends StatelessWidget {
                 title: 'Custom Reminder Text',
                 subtitle: profile.customNotificationText ?? 'Default message',
                 icon: Icons.edit_notifications_outlined,
-                onTap: () => context.push(Routes.customNotifText),
+                onTap: () {
+                  if (profile.isPremium) {
+                    context.push(Routes.customNotifText);
+                  } else {
+                    context.push(Routes.paywall);
+                  }
+                },
               ),
               const SizedBox(height: 16),
               
               _SectionHeader(title: 'App Settings'),
               SettingsCard(
+                title: 'Subscription',
+                subtitle: profile.isPremium ? 'Active' : 'Upgrade to Freemium',
+                icon: Icons.star_border_outlined,
+                onTap: () => context.push(Routes.paywall),
+              ),
+              SettingsCard(
                 title: 'Add Widget',
                 subtitle: 'Add JustDrink to your home screen',
                 icon: Icons.widgets_outlined,
-                onTap: () => _onAddWidget(context),
+                onTap: () {
+                  if (profile.isPremium) {
+                    _onAddWidget(context);
+                  } else {
+                    context.push(Routes.paywall);
+                  }
+                },
               ),
               SettingsCard(
                 title: 'Custom Log Volumes',
                 subtitle: 'Modify your quick add amounts',
                 icon: Icons.liquor_outlined,
-                onTap: () => _showSwitchCupDialog(context, profile.quickAdd1Ml),
+                onTap: () {
+                  if (profile.isPremium) {
+                    _showSwitchCupDialog(context, profile.quickAdd1Ml);
+                  } else {
+                    context.push(Routes.paywall);
+                  }
+                },
               ),
               SettingsCard(
                 title: 'Terms & Conditions',
