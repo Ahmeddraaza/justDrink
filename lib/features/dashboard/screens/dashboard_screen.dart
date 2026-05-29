@@ -195,7 +195,7 @@ class _DashboardView extends StatelessWidget {
                                             if (state.isPremium) {
                                               _onAddWidget(context);
                                             } else {
-                                              context.push(Routes.paywall);
+                                              _showPremiumPopup(context, 'Home Screen Widget');
                                             }
                                           },
                                           style: TextButton.styleFrom(
@@ -500,7 +500,7 @@ class _DashboardView extends StatelessWidget {
                           if (state.isPremium) {
                             _showCustomizeCupDialog(context, state);
                           } else {
-                            context.push(Routes.paywall);
+                            _showPremiumPopup(context, 'Custom Log Volumes');
                           }
                         },
                         child: Container(
@@ -684,6 +684,45 @@ class _DashboardView extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+  void _showPremiumPopup(BuildContext context, String featureName) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              const Icon(Icons.workspace_premium_outlined, color: Colors.amber, size: 28),
+              const SizedBox(width: 8),
+              Text('Premium', style: AppTextStyles.h3),
+            ],
+          ),
+          content: Text(
+            '$featureName is a Freemium feature. Unlock the full potential of JustDrink by subscribing!',
+            style: AppTextStyles.bodyMedium,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('Maybe Later', style: TextStyle(color: AppColors.body)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.push(Routes.paywall);
+              },
+              child: const Text('Subscribe', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

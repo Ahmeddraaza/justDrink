@@ -10,7 +10,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../services/notification_service.dart';
 import '../../../data/preferences/preferences_service.dart';
-import '../../../shared/widgets/banner_ad_widget.dart';
+import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../widgets/settings_header.dart';
 import '../widgets/settings_card.dart';
 import '../../../services/widget_service.dart';
@@ -37,18 +37,28 @@ class _SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('Settings', style: AppTextStyles.h2.copyWith(color: AppColors.heading)),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.read<AdCubit>().showInterstitial();
+        context.go(Routes.dashboard);
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.heading),
-          onPressed: () => context.go(Routes.dashboard),
+        appBar: AppBar(
+          title: Text('Settings', style: AppTextStyles.h2.copyWith(color: AppColors.heading)),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.heading),
+            onPressed: () {
+              context.read<AdCubit>().showInterstitial();
+              context.go(Routes.dashboard);
+            },
+          ),
         ),
-      ),
       body: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
           final profile = state.profile;
@@ -130,7 +140,7 @@ class _SettingsView extends StatelessWidget {
                   if (profile.isPremium) {
                     context.push(Routes.customNotifText);
                   } else {
-                    context.push(Routes.paywall);
+                    _showPremiumPopup(context, 'Custom Reminder Text');
                   }
                 },
               ),
@@ -151,7 +161,7 @@ class _SettingsView extends StatelessWidget {
                   if (profile.isPremium) {
                     _onAddWidget(context);
                   } else {
-                    context.push(Routes.paywall);
+                    _showPremiumPopup(context, 'Home Screen Widget');
                   }
                 },
               ),
@@ -163,7 +173,7 @@ class _SettingsView extends StatelessWidget {
                   if (profile.isPremium) {
                     _showSwitchCupDialog(context, profile.quickAdd1Ml);
                   } else {
-                    context.push(Routes.paywall);
+                    _showPremiumPopup(context, 'Custom Log Volumes');
                   }
                 },
               ),
@@ -180,8 +190,6 @@ class _SettingsView extends StatelessWidget {
                 onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
               ),
               const SizedBox(height: 32),
-              const BannerAdWidget(),
-              const SizedBox(height: 24),
               Center(
                 child: Text(
                   'Version 1.0.0',
@@ -191,6 +199,7 @@ class _SettingsView extends StatelessWidget {
             ],
           );
         },
+      ),
       ),
     );
   }
@@ -207,6 +216,46 @@ class _SettingsView extends StatelessWidget {
     } catch (e) {
       debugPrint('Error pinning widget: $e');
     }
+  }
+
+  void _showPremiumPopup(BuildContext context, String featureName) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              const Icon(Icons.workspace_premium_outlined, color: Colors.amber, size: 28),
+              const SizedBox(width: 8),
+              Text('Premium', style: AppTextStyles.h3),
+            ],
+          ),
+          content: Text(
+            '$featureName is a Freemium feature. Unlock the full potential of JustDrink by subscribing!',
+            style: AppTextStyles.bodyMedium,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('Maybe Later', style: TextStyle(color: AppColors.body)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.push(Routes.paywall);
+              },
+              child: const Text('Subscribe', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _selectTime(

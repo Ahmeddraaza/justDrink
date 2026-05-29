@@ -39,15 +39,16 @@ class SettingsHeader extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Positioned(
-            right: -10,
-            top: -10,
-            child: Icon(
-              isPremium ? Icons.workspace_premium_outlined : Icons.person_outline,
-              size: 100,
-              color: Colors.white.withValues(alpha: 0.1),
+          if (isPremium)
+            Positioned(
+              right: -10,
+              top: -10,
+              child: Icon(
+                Icons.workspace_premium_outlined,
+                size: 100,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
             ),
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
