@@ -1,4 +1,4 @@
-package com.justdrink.justdrink
+package com.hanotech.justdrinkfreemium
 
 import android.content.BroadcastReceiver
 import android.content.Context
