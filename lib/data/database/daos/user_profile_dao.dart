@@ -13,7 +13,7 @@ class UserProfileDao extends DatabaseAccessor<AppDatabase>
   Future<UserProfileData?> getProfile() async {
     final profile = await (select(userProfile)..where((t) => t.id.equals(1))).getSingleOrNull();
     if (profile != null) {
-      return profile.copyWith(isPremium: true);
+      return profile;
     }
     return null;
   }
@@ -24,7 +24,7 @@ class UserProfileDao extends DatabaseAccessor<AppDatabase>
         .watchSingleOrNull()
         .map((profile) {
           if (profile != null) {
-            return profile.copyWith(isPremium: true);
+            return profile;
           }
           return null;
         });
