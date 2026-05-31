@@ -164,12 +164,12 @@ class _PaywallViewState extends State<_PaywallView> {
           return CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     Image.asset(
                       'assets/images/subs_screen_img.png',
-                      height: 65,
+                      height: 85,
                       fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 8),
@@ -209,7 +209,6 @@ class _PaywallViewState extends State<_PaywallView> {
                         _FeatureTile(title: 'Custom Volumes', icon: Icons.water_drop_rounded),
                       ],
                     ),
-                    const SizedBox(height: 14),
                     ...plans.map((plan) {
                       final isSelected = _selectedPlanId == plan.id;
                       return GestureDetector(
@@ -380,10 +379,7 @@ class _PaywallViewState extends State<_PaywallView> {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            'Weekly & Yearly plans auto-renew until cancelled. '
-                            'Lifetime is a one-time purchase. '
-                            'Manage or cancel anytime in iPhone Settings → Apple ID → Subscriptions.',
+                          child: Text("By subscribing, you agree to our",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 10,
@@ -408,7 +404,7 @@ class _PaywallViewState extends State<_PaywallView> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text('•', style: TextStyle(fontSize: 12, color: AppColors.body)),
+                            Text('&', style: TextStyle(fontSize: 12, color: AppColors.body)),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => _launchURL('https://hanotech.net/privacy-policy'),

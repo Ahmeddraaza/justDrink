@@ -87,6 +87,9 @@ class PurchaseService {
           break;
 
         case PurchaseStatus.error:
+          if (purchase.pendingCompletePurchase) {
+            await _iap.completePurchase(purchase);
+          }
           if (_isCancellationError(purchase.error)) {
             _purchaseController.add(PurchaseResult.cancelled());
           } else {
@@ -97,6 +100,9 @@ class PurchaseService {
           break;
 
         case PurchaseStatus.canceled:
+          if (purchase.pendingCompletePurchase) {
+            await _iap.completePurchase(purchase);
+          }
           _purchaseController.add(PurchaseResult.cancelled());
           break;
 

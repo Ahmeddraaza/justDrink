@@ -233,7 +233,7 @@ class _SettingsView extends StatelessWidget {
             ],
           ),
           content: Text(
-            '$featureName is a Freemium feature. Unlock the full potential of JustDrink by subscribing!',
+            '$featureName is a Premium feature. Unlock the full potential of JustDrink by subscribing!',
             style: AppTextStyles.bodyMedium,
           ),
           actions: [
