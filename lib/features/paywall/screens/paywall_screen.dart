@@ -12,6 +12,7 @@ import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../core/constants/route_constants.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../services/analytics_service.dart';
 
 class PaywallScreen extends StatelessWidget {
@@ -192,10 +193,10 @@ class _PaywallViewState extends State<_PaywallView> {
                     Text(
                       'Unlock Your Ultimate Hydration',
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.h2.copyWith(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 22,
                         color: AppColors.heading,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -204,9 +205,10 @@ class _PaywallViewState extends State<_PaywallView> {
                       child: Text(
                         'Stay perfectly hydrated and healthy daily.',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: GoogleFonts.plusJakartaSans(
                           color: AppColors.body,
                           fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -271,7 +273,8 @@ class _PaywallViewState extends State<_PaywallView> {
                                   children: [
                                     Text(
                                       plan.title,
-                                      style: AppTextStyles.bodyLarge.copyWith(
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.heading,
                                       ),
@@ -279,7 +282,8 @@ class _PaywallViewState extends State<_PaywallView> {
                                     const SizedBox(height: 2),
                                     Text(
                                       plan.description,
-                                      style: AppTextStyles.bodySmall.copyWith(
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12,
                                         color: isSelected ? planAccent : AppColors.body,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                                       ),
@@ -298,15 +302,20 @@ class _PaywallViewState extends State<_PaywallView> {
                                     ),
                                     child: Text(
                                       plan.badgeText,
-                                      style: const TextStyle(color: planAccent, fontSize: 11, fontWeight: FontWeight.bold),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        color: planAccent,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     plan.priceText,
-                                    style: AppTextStyles.bodyLarge.copyWith(
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 16,
                                       color: AppColors.heading,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ],
@@ -382,9 +391,13 @@ class _PaywallViewState extends State<_PaywallView> {
                                     height: 24,
                                     child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
                                   )
-                                : const Text(
+                                : Text(
                                     'Subscribe Now',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                           ),
                         ),
@@ -396,15 +409,22 @@ class _PaywallViewState extends State<_PaywallView> {
                             foregroundColor: AppColors.body,
                             padding: const EdgeInsets.symmetric(vertical: 4),
                           ),
-                          child: const Text('Restore Purchases'),
+                          child: Text(
+                            'Restore Purchases',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text("By subscribing, you agree to our",
+                          child: Text(
+                            "By subscribing, you agree to our",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 10,
-                              color: AppColors.body.withAlpha(160),
+                              color: AppColors.body.withOpacity(0.6),
                               height: 1.5,
                             ),
                           ),
@@ -417,23 +437,31 @@ class _PaywallViewState extends State<_PaywallView> {
                               onTap: () => _launchURL('https://hanotech.net/terms'),
                               child: Text(
                                 'Terms of Service',
-                                style: AppTextStyles.bodySmall.copyWith(
+                                style: GoogleFonts.plusJakartaSans(
                                   color: AppColors.body,
-                                  fontSize: 12,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text('&', style: TextStyle(fontSize: 12, color: AppColors.body)),
+                            Text(
+                              '&',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                color: AppColors.body.withOpacity(0.6),
+                              ),
+                            ),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
                               child: Text(
                                 'Privacy Policy',
-                                style: AppTextStyles.bodySmall.copyWith(
+                                style: GoogleFonts.plusJakartaSans(
                                   color: AppColors.body,
-                                  fontSize: 12,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
@@ -492,9 +520,9 @@ class _FeatureTile extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A2B4A),
+                color: const Color(0xFF1A2B4A),
                 fontSize: 12,
               ),
               maxLines: 2,
