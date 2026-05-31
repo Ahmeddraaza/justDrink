@@ -138,6 +138,11 @@ class NotificationService {
   }
 
   Future<void> rescheduleAll(UserProfileData profile) async {
+    if (!profile.remindersEnabled) {
+      await cancelAll();
+      return;
+    }
+
     final text = profile.customNotificationText ?? 'Time to drink water!';
     final count = profile.isPremium ? 10 : 6;
     await scheduleAll(
