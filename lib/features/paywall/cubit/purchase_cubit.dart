@@ -45,7 +45,14 @@ class PurchaseCubit extends Cubit<PurchaseState> {
 
   Future<void> restore() async {
     emit(state.copyWith(isPurchasing: true, errorMessage: null));
-    await purchaseService.restorePurchases();
+    try {
+      await purchaseService.restorePurchases();
+      // Wait shortly to let the purchase updates stream process before stopping loading state
+      await Future.delayed(const Duration(seconds: 2));
+      emit(state.copyWith(isPurchasing: false));
+    } catch (e) {
+      emit(state.copyWith(isPurchasing: false, errorMessage: e.toString()));
+    }
   }
 
   @override

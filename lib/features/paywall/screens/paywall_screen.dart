@@ -10,6 +10,7 @@ import '../../../services/purchase_service.dart';
 import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaywallScreen extends StatelessWidget {
   const PaywallScreen({super.key});
@@ -37,8 +38,20 @@ class _PaywallView extends StatefulWidget {
 class _PaywallViewState extends State<_PaywallView> {
   String _selectedPlanId = 'justdrink_pro_annual'; // Default selected plan
 
-  // Vibrant accent green matching the premium billing mockup screen
-  static const Color planAccent = Color(0xFF00A86B);
+  // Highly cohesive ocean blue matching the app's primary and wave colors
+  static const Color planAccent = AppColors.wave2;
+  static const Color planPrimaryLight = AppColors.primary;
+
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('Could not launch URL: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,44 +140,25 @@ class _PaywallViewState extends State<_PaywallView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Header Section
-                      RichText(
+                      // Header Section - short, catchy one-liner
+                      Text(
+                        'Unlock Your Ultimate Hydration',
                         textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: AppTextStyles.h2.copyWith(
-                            fontSize: 26,
-                            color: AppColors.heading,
-                            fontWeight: FontWeight.w900,
-                          ),
-                          children: const [
-                            TextSpan(text: 'Start Your Hydration Journey – \n'),
-                            TextSpan(
-                              text: 'Explore Our Plans',
-                              style: TextStyle(color: planAccent),
-                            ),
-                          ],
+                        style: AppTextStyles.h2.copyWith(
+                          fontSize: 22,
+                          color: AppColors.heading,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: RichText(
+                        child: Text(
+                          'Stay perfectly hydrated and healthy daily.',
                           textAlign: TextAlign.center,
-                          text: TextSpan(
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.body,
-                              fontSize: 15,
-                            ),
-                            children: const [
-                              TextSpan(text: 'Stay hydrated and healthy daily for '),
-                              TextSpan(
-                                text: 'less than a cup of coffee',
-                                style: TextStyle(
-                                  color: planAccent,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.body,
+                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -180,7 +174,7 @@ class _PaywallViewState extends State<_PaywallView> {
                           ),
                           Expanded(
                             child: _PremiumGridItem(
-                              title: 'Unlimited Reminders',
+                              title: 'Custom Reminders',
                             ),
                           ),
                         ],
@@ -317,7 +311,7 @@ class _PaywallViewState extends State<_PaywallView> {
                 ),
               ),
 
-              // Bottom Button & Restore Section
+              // Bottom Button, Restore & Hyperlinks Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
@@ -365,16 +359,57 @@ class _PaywallViewState extends State<_PaywallView> {
                               ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
                     TextButton(
                       onPressed: state.isPurchasing
                           ? null
                           : () => context.read<PurchaseCubit>().restore(),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.body,
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                       ),
                       child: const Text('Restore Purchases'),
                     ),
+                    const SizedBox(height: 4),
+                    
+                    // Hyperlinks for Terms and Privacy Policy
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _launchURL('https://hanotech.net/terms'),
+                          child: Text(
+                            'Terms of Service',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.body,
+                              fontSize: 12,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.body,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
+                          child: Text(
+                            'Privacy Policy',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.body,
+                              fontSize: 12,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
