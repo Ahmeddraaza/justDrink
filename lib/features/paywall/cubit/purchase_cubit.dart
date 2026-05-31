@@ -22,26 +22,32 @@ class PurchaseCubit extends Cubit<PurchaseState> {
   Future<void> initialize() async {
     emit(state.copyWith(isLoading: true, errorMessage: null, feedbackMessage: null));
     final products = await purchaseService.initialize();
-    
-    // Cancel old listener if any to prevent duplicates
+
+    // Cancel old listener if any to prevent duplicate events
     _purchaseSubscription?.cancel();
     _purchaseSubscription = purchaseService.purchaseResultStream.listen((result) async {
       if (result.success) {
         await userProfileDao.updatePremiumStatus(isPremium: true, productId: result.productId);
         adCubit.onPremiumUnlocked();
+        // Fix #8: Only emit purchaseSuccess — don't also set feedbackMessage to avoid double SnackBar
         emit(state.copyWith(
-          isPurchasing: false, 
+          isPurchasing: false,
           purchaseSuccess: true,
-          feedbackMessage: 'Welcome to PRO! 💎',
         ));
       } else if (result.cancelled) {
         emit(state.copyWith(
-          isPurchasing: false, 
+          isPurchasing: false,
           feedbackMessage: 'Purchase cancelled.',
+        ));
+      } else if (result.isPending) {
+        // Fix #10: Handle Ask to Buy (parental controls) pending state
+        emit(state.copyWith(
+          isPurchasing: false,
+          feedbackMessage: 'Purchase is pending approval.',
         ));
       } else {
         emit(state.copyWith(
-          isPurchasing: false, 
+          isPurchasing: false,
           errorMessage: result.errorMessage,
         ));
       }
@@ -50,40 +56,78 @@ class PurchaseCubit extends Cubit<PurchaseState> {
     emit(state.copyWith(products: products, isLoading: false));
   }
 
+  // Fix #3: Wrap purchase in try/catch so spinner never gets permanently stuck
   Future<void> buyProduct(ProductDetails product) async {
     emit(state.copyWith(isPurchasing: true, errorMessage: null, feedbackMessage: null));
-    await purchaseService.purchase(product);
-  }
-
-  Future<void> restore() async {
-    emit(state.copyWith(isPurchasing: true, errorMessage: null, feedbackMessage: null));
     try {
-      await purchaseService.restorePurchases();
-      // Wait shortly to let the purchase updates stream process before stopping loading state
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (!state.purchaseSuccess) {
+      await purchaseService.purchase(product);
+    } catch (e) {
+      final errStr = e.toString().toLowerCase();
+      // Silently dismiss cancellation exceptions thrown by StoreKit
+      if (errStr.contains('cancel') || errStr.contains('skerror') || errStr.contains('code 2')) {
         emit(state.copyWith(
           isPurchasing: false,
-          feedbackMessage: 'No active purchases found to restore.',
+          feedbackMessage: 'Purchase cancelled.',
         ));
       } else {
-        emit(state.copyWith(isPurchasing: false));
+        emit(state.copyWith(
+          isPurchasing: false,
+          errorMessage: 'Purchase failed. Please try again.',
+        ));
       }
+    }
+  }
+
+  // Fix #4: Use a local completer flag to avoid race condition on restore check
+  Future<void> restore() async {
+    emit(state.copyWith(isPurchasing: true, errorMessage: null, feedbackMessage: null));
+
+    bool restoredAtLeastOne = false;
+
+    // Temporarily listen to the stream to detect if a restore comes through
+    final completer = Completer<void>();
+    late StreamSubscription sub;
+
+    sub = purchaseService.purchaseResultStream.listen((result) {
+      if (result.success) {
+        restoredAtLeastOne = true;
+        if (!completer.isCompleted) completer.complete();
+      }
+    });
+
+    try {
+      await purchaseService.restorePurchases();
+      // Wait up to 4 seconds for any restore callback to arrive
+      await completer.future.timeout(const Duration(seconds: 4), onTimeout: () {});
     } catch (e) {
       final errorStr = e.toString().toLowerCase();
-      if (errorStr.contains('cancelled') || errorStr.contains('cancel') || errorStr.contains('skerror') || errorStr.contains('code 2')) {
+      if (errorStr.contains('cancelled') || errorStr.contains('cancel') ||
+          errorStr.contains('skerror') || errorStr.contains('code 2')) {
         emit(state.copyWith(
           isPurchasing: false,
           feedbackMessage: 'Restore cancelled.',
         ));
+        await sub.cancel();
+        return;
       } else {
         emit(state.copyWith(
-          isPurchasing: false, 
-          errorMessage: e.toString(),
+          isPurchasing: false,
+          errorMessage: 'Restore failed. Please try again.',
         ));
+        await sub.cancel();
+        return;
       }
     }
+
+    await sub.cancel();
+
+    if (!restoredAtLeastOne) {
+      emit(state.copyWith(
+        isPurchasing: false,
+        feedbackMessage: 'No active purchases found to restore.',
+      ));
+    }
+    // If restored, the stream listener above already emitted purchaseSuccess via the main subscription
   }
 
   @override

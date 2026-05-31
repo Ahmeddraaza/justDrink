@@ -64,14 +64,12 @@ class _PaywallViewState extends State<_PaywallView> {
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.heading),
           onPressed: () {
-            // Trigger interstitial ad on cross press for free users
-            final profileDao = GetIt.I<UserProfileDao>();
-            profileDao.getProfile().then((profile) {
-              if (profile == null || !profile.isPremium) {
-                context.read<AdCubit>().showInterstitial();
-              }
-            });
-            
+            // Check premium state synchronously via AdCubit to avoid async context gap
+            final adCubit = context.read<AdCubit>();
+            if (!adCubit.state.isPremium) {
+              adCubit.showInterstitial();
+            }
+
             if (context.canPop()) {
               context.pop();
             } else {
@@ -83,19 +81,16 @@ class _PaywallViewState extends State<_PaywallView> {
       body: BlocConsumer<PurchaseCubit, PurchaseState>(
         listener: (context, state) {
           if (state.purchaseSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Welcome to PRO! 💎'),
-                backgroundColor: planAccent,
-              ),
-            );
+            // Fix #5: Navigate directly — SnackBar would be dismissed instantly anyway
+            // The navigation itself is the clearest success signal
             if (context.canPop()) {
               context.pop();
             } else {
               context.go(Routes.dashboard);
             }
           }
-          if (state.feedbackMessage != null) {
+          // Fix #8: Only show feedbackMessage if purchase did NOT succeed
+          if (!state.purchaseSuccess && state.feedbackMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.feedbackMessage!),
@@ -132,29 +127,30 @@ class _PaywallViewState extends State<_PaywallView> {
             if (p.id == 'justdrink_pro_lifetime') lifetimeProduct = p;
           }
 
+          // Fix #7: Don't hardcode USD prices — show unavailable if products not loaded
           final List<_PlanOption> plans = [
             _PlanOption(
               id: 'justdrink_pro_weekly',
-              title: 'Weekly Plan',
-              description: 'Best to try out features',
-              badgeText: 'Save 0%',
-              priceText: weeklyProduct?.price ?? '\$0.99',
+              title: 'Weekly',
+              description: 'Auto-renews weekly',
+              badgeText: 'Try it',
+              priceText: weeklyProduct?.price ?? '—',
               rawProduct: weeklyProduct,
             ),
             _PlanOption(
               id: 'justdrink_pro_annual',
-              title: 'Yearly Plan',
-              description: 'Most Popular',
+              title: 'Yearly',
+              description: 'Auto-renews yearly',
               badgeText: 'Save 60%',
-              priceText: annualProduct?.price ?? '\$19.99',
+              priceText: annualProduct?.price ?? '—',
               rawProduct: annualProduct,
             ),
             _PlanOption(
               id: 'justdrink_pro_lifetime',
-              title: 'Lifetime Access',
-              description: 'One-time payment forever',
+              title: 'Lifetime',
+              description: 'One-time, forever',
               badgeText: 'Best Value',
-              priceText: lifetimeProduct?.price ?? '\$29.99',
+              priceText: lifetimeProduct?.price ?? '—',
               rawProduct: lifetimeProduct,
             ),
           ];
@@ -382,20 +378,16 @@ class _PaywallViewState extends State<_PaywallView> {
                             ? null
                             : () {
                                 final selectedPlan = plans.firstWhere((p) => p.id == _selectedPlanId);
+                                // Fix #2: Never use a fake ProductDetails — inform user if products unavailable
                                 if (selectedPlan.rawProduct != null) {
                                   context.read<PurchaseCubit>().buyProduct(selectedPlan.rawProduct!);
                                 } else {
-                                  // Fallback simulation for offline/simulators
-                                  context.read<PurchaseCubit>().buyProduct(
-                                        ProductDetails(
-                                          id: selectedPlan.id,
-                                          title: selectedPlan.title,
-                                          description: selectedPlan.description,
-                                          price: selectedPlan.priceText,
-                                          rawPrice: 0.0,
-                                          currencyCode: 'USD',
-                                        ),
-                                      );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Store is temporarily unavailable. Please try again.'),
+                                      backgroundColor: Color(0xFF0C8AE4),
+                                    ),
+                                  );
                                 }
                               },
                         child: state.isPurchasing
@@ -426,6 +418,22 @@ class _PaywallViewState extends State<_PaywallView> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                       ),
                       child: const Text('Restore Purchases'),
+                    ),
+                    const SizedBox(height: 4),
+                    // Fix #6: Apple Guideline 3.1.2(b) — required auto-renewal & pricing disclosure
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        'Weekly & Yearly plans auto-renew until cancelled. '
+                        'Lifetime is a one-time purchase. '
+                        'Manage or cancel anytime in iPhone Settings → Apple ID → Subscriptions.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.body.withAlpha(160),
+                          height: 1.5,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     
