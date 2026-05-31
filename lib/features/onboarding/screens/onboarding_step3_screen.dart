@@ -92,7 +92,7 @@ class _OnboardingStep3View extends StatelessWidget {
                             await cubit.requestNotificationPermission();
                             await cubit.completeOnboarding();
                             if (context.mounted) {
-                              context.go(Routes.dashboard);
+                              context.go(Routes.paywall);
                             }
                           },
                     child: state.isLoading

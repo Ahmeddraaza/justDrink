@@ -36,6 +36,23 @@ class PurchaseService {
     await _iap.restorePurchases();
   }
 
+  bool _isCancellationError(IAPError? error) {
+    if (error == null) return false;
+    final msg = error.message.toLowerCase();
+    final code = error.code.toLowerCase();
+    
+    if (code.contains('cancel') || code == 'e_user_cancelled' || code == 'user_cancelled') {
+      return true;
+    }
+    if (msg.contains('cancel') || msg.contains('user cancelled')) {
+      return true;
+    }
+    if (code == '2' || msg.contains('skerror') || msg.contains('code 2') || msg.contains('cancelled')) {
+      return true;
+    }
+    return false;
+  }
+
   void _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
       if (purchase.status == PurchaseStatus.purchased ||
@@ -49,9 +66,13 @@ class PurchaseService {
         );
         _purchaseController.add(PurchaseResult.success(purchase.productID));
       } else if (purchase.status == PurchaseStatus.error) {
-        _purchaseController.add(
-          PurchaseResult.error(purchase.error?.message ?? 'Purchase failed'),
-        );
+        if (_isCancellationError(purchase.error)) {
+          _purchaseController.add(PurchaseResult.cancelled());
+        } else {
+          _purchaseController.add(
+            PurchaseResult.error(purchase.error?.message ?? 'Purchase failed'),
+          );
+        }
       } else if (purchase.status == PurchaseStatus.canceled) {
         _purchaseController.add(PurchaseResult.cancelled());
       }

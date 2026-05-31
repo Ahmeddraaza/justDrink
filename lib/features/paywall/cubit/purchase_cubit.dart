@@ -51,7 +51,12 @@ class PurchaseCubit extends Cubit<PurchaseState> {
       await Future.delayed(const Duration(seconds: 2));
       emit(state.copyWith(isPurchasing: false));
     } catch (e) {
-      emit(state.copyWith(isPurchasing: false, errorMessage: e.toString()));
+      final errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('cancelled') || errorStr.contains('cancel') || errorStr.contains('skerror') || errorStr.contains('code 2')) {
+        emit(state.copyWith(isPurchasing: false));
+      } else {
+        emit(state.copyWith(isPurchasing: false, errorMessage: e.toString()));
+      }
     }
   }
 

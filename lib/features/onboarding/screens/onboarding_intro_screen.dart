@@ -56,7 +56,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
       );
     } else {
       context.read<OnboardingCubit>().completeOnboarding().then((_) {
-        context.go(Routes.dashboard);
+        context.go(Routes.paywall);
       });
     }
   }
@@ -99,7 +99,7 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
                       TextButton(
                         onPressed: () {
                           context.read<OnboardingCubit>().completeOnboarding().then((_) {
-                            context.go(Routes.dashboard);
+                            context.go(Routes.paywall);
                           });
                         },
                         child: Text('Skip', style: AppTextStyles.bodyMedium.copyWith(color: Colors.grey, fontSize: 16)),

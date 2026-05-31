@@ -6,6 +6,7 @@ import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/preferences/preferences_service.dart';
+import '../../../data/database/daos/user_profile_dao.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,10 +42,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     if (!prefs.isOnboardingComplete) {
       context.go(Routes.onboardingIntro);
     } else {
-      context.go(Routes.dashboard);
+      final profile = await GetIt.I<UserProfileDao>().getProfile();
+      final isPremium = profile?.isPremium ?? false;
+      if (!isPremium) {
+        context.go(Routes.paywall);
+      } else {
+        context.go(Routes.dashboard);
+      }
     }
-
-
   }
 
   @override

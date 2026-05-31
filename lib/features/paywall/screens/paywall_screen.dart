@@ -9,6 +9,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../services/purchase_service.dart';
 import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
+import '../../../core/constants/route_constants.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -62,7 +63,21 @@ class _PaywallViewState extends State<_PaywallView> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.heading),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            // Trigger interstitial ad on cross press for free users
+            final profileDao = GetIt.I<UserProfileDao>();
+            profileDao.getProfile().then((profile) {
+              if (profile == null || !profile.isPremium) {
+                context.read<AdCubit>().showInterstitial();
+              }
+            });
+            
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(Routes.dashboard);
+            }
+          },
         ),
       ),
       body: BlocConsumer<PurchaseCubit, PurchaseState>(
@@ -74,7 +89,11 @@ class _PaywallViewState extends State<_PaywallView> {
                 backgroundColor: planAccent,
               ),
             );
-            context.pop();
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(Routes.dashboard);
+            }
           }
           if (state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -372,7 +391,14 @@ class _PaywallViewState extends State<_PaywallView> {
                                 }
                               },
                         child: state.isPurchasing
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Text(
                                 'Subscribe Now',
                                 style: TextStyle(
