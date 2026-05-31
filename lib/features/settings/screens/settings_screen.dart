@@ -165,15 +165,15 @@ class _SettingsView extends StatelessWidget {
                   }
                 },
               ),
-              SettingsCard(
-                title: 'Custom Log Volumes',
-                subtitle: 'Modify your quick add amounts',
+               SettingsCard(
+                title: 'Custom Drink Sizes',
+                subtitle: 'Customize your quick add amounts',
                 icon: Icons.liquor_outlined,
                 onTap: () {
                   if (profile.isPremium) {
                     _showSwitchCupDialog(context, profile.quickAdd1Ml);
                   } else {
-                    _showPremiumPopup(context, 'Custom Log Volumes');
+                    _showPremiumPopup(context, 'Custom Drink Sizes');
                   }
                 },
               ),

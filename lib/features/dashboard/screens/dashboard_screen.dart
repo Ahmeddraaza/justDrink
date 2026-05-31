@@ -506,7 +506,7 @@ class _DashboardView extends StatelessWidget {
                           if (state.isPremium) {
                             _showCustomizeCupDialog(context, state);
                           } else {
-                            _showPremiumPopup(context, 'Custom Log Volumes');
+                            _showPremiumPopup(context, 'Custom Drink Sizes');
                           }
                         },
                         child: Container(

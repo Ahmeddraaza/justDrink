@@ -224,7 +224,7 @@ class _PaywallViewState extends State<_PaywallView> {
                         _FeatureTile(title: 'Remove Ads', icon: Icons.block_rounded),
                         _FeatureTile(title: 'Custom Reminders', icon: Icons.notifications_active_rounded),
                         _FeatureTile(title: 'Home Widget', icon: Icons.widgets_rounded),
-                        _FeatureTile(title: 'Custom Volumes', icon: Icons.water_drop_rounded),
+                        _FeatureTile(title: 'Custom Drink Sizes', icon: Icons.water_drop_rounded),
                       ],
                     ),
                     ...plans.map((plan) {

@@ -58,7 +58,7 @@ class _CustomVolumeEditViewState extends State<_CustomVolumeEditView> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Custom Volumes')),
+        appBar: AppBar(title: const Text('Custom Drink Sizes')),
         body: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
