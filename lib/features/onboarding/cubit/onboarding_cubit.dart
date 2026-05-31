@@ -7,6 +7,7 @@ import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../services/notification_service.dart';
 import '../../../services/widget_service.dart';
 import '../../../data/preferences/preferences_service.dart';
+import '../../../services/analytics_service.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
   final UserProfileDao userProfileDao;
@@ -101,6 +102,11 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       }
       
       await preferencesService.setBool('onboarding_complete', true);
+      try {
+        await AnalyticsService.logOnboardingComplete();
+      } catch (e) {
+        debugPrint('Analytics failed: $e');
+      }
       emit(state.copyWith(isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));

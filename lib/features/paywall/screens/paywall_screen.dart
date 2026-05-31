@@ -12,6 +12,7 @@ import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../core/constants/route_constants.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../services/analytics_service.dart';
 
 class PaywallScreen extends StatelessWidget {
   const PaywallScreen({super.key});
@@ -38,6 +39,16 @@ class _PaywallView extends StatefulWidget {
 
 class _PaywallViewState extends State<_PaywallView> {
   String _selectedPlanId = 'justdrink_pro_annual'; // Default selected plan
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      AnalyticsService.logViewSubscription();
+    } catch (e) {
+      debugPrint('Analytics failed: $e');
+    }
+  }
 
   // Vibrant branding colors requested: 5DCCFC (Sky Blue), 0C8AE4 (Deep Sky Blue) & White
   static const Color planLight = Color(0xFF5DCCFC);
@@ -86,6 +97,11 @@ class _PaywallViewState extends State<_PaywallView> {
             prev.errorMessage != curr.errorMessage,
         listener: (context, state) {
           if (state.purchaseSuccess) {
+            try {
+              AnalyticsService.logPurchaseSuccess(planId: _selectedPlanId);
+            } catch (e) {
+              debugPrint('Analytics failed: $e');
+            }
             if (context.canPop()) {
               context.pop();
             } else {
@@ -345,6 +361,11 @@ class _PaywallViewState extends State<_PaywallView> {
                                 : () {
                                     final selectedPlan = plans.firstWhere((p) => p.id == _selectedPlanId);
                                     if (selectedPlan.rawProduct != null) {
+                                      try {
+                                        AnalyticsService.logClickSubscribe(planId: _selectedPlanId);
+                                      } catch (e) {
+                                        debugPrint('Analytics failed: $e');
+                                      }
                                       context.read<PurchaseCubit>().buyProduct(selectedPlan.rawProduct!);
                                     } else {
                                       ScaffoldMessenger.of(context).showSnackBar(
