@@ -79,17 +79,19 @@ class _PaywallViewState extends State<_PaywallView> {
         ),
       ),
       body: BlocConsumer<PurchaseCubit, PurchaseState>(
+        // Only fire listener when a message actually changes — prevents stale replays
+        listenWhen: (prev, curr) =>
+            prev.purchaseSuccess != curr.purchaseSuccess ||
+            prev.feedbackMessage != curr.feedbackMessage ||
+            prev.errorMessage != curr.errorMessage,
         listener: (context, state) {
           if (state.purchaseSuccess) {
-            // Fix #5: Navigate directly — SnackBar would be dismissed instantly anyway
-            // The navigation itself is the clearest success signal
             if (context.canPop()) {
               context.pop();
             } else {
               context.go(Routes.dashboard);
             }
           }
-          // Fix #8: Only show feedbackMessage if purchase did NOT succeed
           if (!state.purchaseSuccess && state.feedbackMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -97,6 +99,8 @@ class _PaywallViewState extends State<_PaywallView> {
                 backgroundColor: planAccent,
               ),
             );
+            // Consume the message so it can never replay on next state change
+            context.read<PurchaseCubit>().clearMessages();
           }
           if (state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -105,6 +109,8 @@ class _PaywallViewState extends State<_PaywallView> {
                 backgroundColor: AppColors.error,
               ),
             );
+            // Consume the error so it can never replay on next state change
+            context.read<PurchaseCubit>().clearMessages();
           }
         },
         builder: (context, state) {
@@ -164,7 +170,7 @@ class _PaywallViewState extends State<_PaywallView> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'assets/images/womenWaterdrink.png',
+                        'assets/images/subs_screen_img.png',
                         height: 65,
                         fit: BoxFit.contain,
                       ),

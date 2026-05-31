@@ -1,6 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+// Sentinel used to distinguish "not provided" from "explicitly null" in copyWith
+// This allows callers to actually clear nullable String fields by passing null.
+const _unset = Object();
+
 class PurchaseState extends Equatable {
   final List<ProductDetails> products;
   final bool isLoading;
@@ -18,20 +22,26 @@ class PurchaseState extends Equatable {
     this.purchaseSuccess = false,
   });
 
+  /// Passing [null] for [errorMessage] or [feedbackMessage] CLEARS them.
+  /// Omitting them (default _unset) PRESERVES the existing value.
   PurchaseState copyWith({
     List<ProductDetails>? products,
     bool? isLoading,
     bool? isPurchasing,
-    String? errorMessage,
-    String? feedbackMessage,
+    Object? errorMessage = _unset,   // use sentinel so null can mean "clear"
+    Object? feedbackMessage = _unset,
     bool? purchaseSuccess,
   }) {
     return PurchaseState(
       products: products ?? this.products,
       isLoading: isLoading ?? this.isLoading,
       isPurchasing: isPurchasing ?? this.isPurchasing,
-      errorMessage: errorMessage ?? this.errorMessage,
-      feedbackMessage: feedbackMessage ?? this.feedbackMessage,
+      errorMessage: errorMessage == _unset
+          ? this.errorMessage
+          : errorMessage as String?,
+      feedbackMessage: feedbackMessage == _unset
+          ? this.feedbackMessage
+          : feedbackMessage as String?,
       purchaseSuccess: purchaseSuccess ?? this.purchaseSuccess,
     );
   }
