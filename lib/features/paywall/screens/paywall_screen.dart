@@ -140,6 +140,12 @@ class _PaywallViewState extends State<_PaywallView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Image.asset(
+                        'assets/images/womenWaterdrink.png',
+                        height: 100,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 16),
                       // Header Section - short, catchy one-liner
                       Text(
                         'Unlock Your Ultimate Hydration',
