@@ -13,9 +13,7 @@ class AdService {
   Function()? onInterstitialClosed;
 
   Future<void> initialize() async {
-    // Completely bypass AdMob initialization for the ad-free builds
-    // to ensure Apple does not flag the app for tracking or missing ATT prompts.
-    return;
+    await MobileAds.instance.initialize();
   }
 
   // ── Banner Ad ─────────────────────────────────────────────────────
