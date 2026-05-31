@@ -20,18 +20,30 @@ class PurchaseCubit extends Cubit<PurchaseState> {
   }) : super(const PurchaseState());
 
   Future<void> initialize() async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true, errorMessage: null, feedbackMessage: null));
     final products = await purchaseService.initialize();
     
+    // Cancel old listener if any to prevent duplicates
+    _purchaseSubscription?.cancel();
     _purchaseSubscription = purchaseService.purchaseResultStream.listen((result) async {
       if (result.success) {
         await userProfileDao.updatePremiumStatus(isPremium: true, productId: result.productId);
         adCubit.onPremiumUnlocked();
-        emit(state.copyWith(isPurchasing: false, purchaseSuccess: true));
+        emit(state.copyWith(
+          isPurchasing: false, 
+          purchaseSuccess: true,
+          feedbackMessage: 'Welcome to PRO! 💎',
+        ));
       } else if (result.cancelled) {
-        emit(state.copyWith(isPurchasing: false));
+        emit(state.copyWith(
+          isPurchasing: false, 
+          feedbackMessage: 'Purchase cancelled.',
+        ));
       } else {
-        emit(state.copyWith(isPurchasing: false, errorMessage: result.errorMessage));
+        emit(state.copyWith(
+          isPurchasing: false, 
+          errorMessage: result.errorMessage,
+        ));
       }
     });
 
@@ -39,23 +51,37 @@ class PurchaseCubit extends Cubit<PurchaseState> {
   }
 
   Future<void> buyProduct(ProductDetails product) async {
-    emit(state.copyWith(isPurchasing: true, errorMessage: null));
+    emit(state.copyWith(isPurchasing: true, errorMessage: null, feedbackMessage: null));
     await purchaseService.purchase(product);
   }
 
   Future<void> restore() async {
-    emit(state.copyWith(isPurchasing: true, errorMessage: null));
+    emit(state.copyWith(isPurchasing: true, errorMessage: null, feedbackMessage: null));
     try {
       await purchaseService.restorePurchases();
       // Wait shortly to let the purchase updates stream process before stopping loading state
       await Future.delayed(const Duration(seconds: 2));
-      emit(state.copyWith(isPurchasing: false));
+      
+      if (!state.purchaseSuccess) {
+        emit(state.copyWith(
+          isPurchasing: false,
+          feedbackMessage: 'No active purchases found to restore.',
+        ));
+      } else {
+        emit(state.copyWith(isPurchasing: false));
+      }
     } catch (e) {
       final errorStr = e.toString().toLowerCase();
       if (errorStr.contains('cancelled') || errorStr.contains('cancel') || errorStr.contains('skerror') || errorStr.contains('code 2')) {
-        emit(state.copyWith(isPurchasing: false));
+        emit(state.copyWith(
+          isPurchasing: false,
+          feedbackMessage: 'Restore cancelled.',
+        ));
       } else {
-        emit(state.copyWith(isPurchasing: false, errorMessage: e.toString()));
+        emit(state.copyWith(
+          isPurchasing: false, 
+          errorMessage: e.toString(),
+        ));
       }
     }
   }

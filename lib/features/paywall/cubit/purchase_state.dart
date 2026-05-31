@@ -6,6 +6,7 @@ class PurchaseState extends Equatable {
   final bool isLoading;
   final bool isPurchasing;
   final String? errorMessage;
+  final String? feedbackMessage;
   final bool purchaseSuccess;
 
   const PurchaseState({
@@ -13,6 +14,7 @@ class PurchaseState extends Equatable {
     this.isLoading = false,
     this.isPurchasing = false,
     this.errorMessage,
+    this.feedbackMessage,
     this.purchaseSuccess = false,
   });
 
@@ -21,6 +23,7 @@ class PurchaseState extends Equatable {
     bool? isLoading,
     bool? isPurchasing,
     String? errorMessage,
+    String? feedbackMessage,
     bool? purchaseSuccess,
   }) {
     return PurchaseState(
@@ -28,10 +31,18 @@ class PurchaseState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       isPurchasing: isPurchasing ?? this.isPurchasing,
       errorMessage: errorMessage ?? this.errorMessage,
+      feedbackMessage: feedbackMessage ?? this.feedbackMessage,
       purchaseSuccess: purchaseSuccess ?? this.purchaseSuccess,
     );
   }
 
   @override
-  List<Object?> get props => [products, isLoading, isPurchasing, errorMessage, purchaseSuccess];
+  List<Object?> get props => [
+        products,
+        isLoading,
+        isPurchasing,
+        errorMessage,
+        feedbackMessage,
+        purchaseSuccess,
+      ];
 }

@@ -4,26 +4,36 @@ import '../data/preferences/preferences_service.dart';
 
 class PurchaseService {
   final InAppPurchase _iap = InAppPurchase.instance;
-  late StreamSubscription<List<PurchaseDetails>> _subscription;
+  StreamSubscription<List<PurchaseDetails>>? _subscription;
   final _purchaseController = StreamController<PurchaseResult>.broadcast();
+  
+  bool _isInitialized = false;
+  List<ProductDetails> _cachedProducts = [];
 
   // Product IDs — must match exactly in Play Console and App Store Connect
-  static const productMonthly = 'justdrink_pro_monthly';  // $3.49/mo
-  static const productAnnual  = 'justdrink_pro_annual';   // $19.99/yr
+  static const productWeekly = 'justdrink_pro_weekly';
+  static const productAnnual  = 'justdrink_pro_annual';
+  static const productLifetime = 'justdrink_pro_lifetime';
 
   Stream<PurchaseResult> get purchaseResultStream => _purchaseController.stream;
 
   Future<List<ProductDetails>> initialize() async {
+    if (_isInitialized) return _cachedProducts;
+
     final available = await _iap.isAvailable();
     if (!available) return [];
 
+    // Ensure we don't listen multiple times
+    _subscription?.cancel();
     _subscription = _iap.purchaseStream.listen(
       _handlePurchaseUpdates,
       onError: (e) => _purchaseController.add(PurchaseResult.error(e.toString())),
     );
 
-    final response = await _iap.queryProductDetails({productMonthly, productAnnual});
-    return response.productDetails;
+    final response = await _iap.queryProductDetails({productWeekly, productAnnual, productLifetime});
+    _cachedProducts = response.productDetails;
+    _isInitialized = true;
+    return _cachedProducts;
   }
 
   Future<void> purchase(ProductDetails product) async {
@@ -84,7 +94,7 @@ class PurchaseService {
   }
 
   void dispose() {
-    _subscription.cancel();
+    _subscription?.cancel();
     _purchaseController.close();
   }
 }

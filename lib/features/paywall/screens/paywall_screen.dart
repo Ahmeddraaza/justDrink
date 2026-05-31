@@ -95,6 +95,14 @@ class _PaywallViewState extends State<_PaywallView> {
               context.go(Routes.dashboard);
             }
           }
+          if (state.feedbackMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.feedbackMessage!),
+                backgroundColor: planAccent,
+              ),
+            );
+          }
           if (state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -161,10 +169,10 @@ class _PaywallViewState extends State<_PaywallView> {
                     children: [
                       Image.asset(
                         'assets/images/womenWaterdrink.png',
-                        height: 100,
+                        height: 65,
                         fit: BoxFit.contain,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       // Header Section - short, catchy one-liner
                       Text(
                         'Unlock Your Ultimate Hydration',
@@ -187,7 +195,7 @@ class _PaywallViewState extends State<_PaywallView> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 12),
 
                       // Premium Grid list (2 Columns) using exactly requested theme colors
                       const Row(
@@ -219,7 +227,7 @@ class _PaywallViewState extends State<_PaywallView> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
 
                       // Plan list cards
                       ...plans.map((plan) {
@@ -231,8 +239,8 @@ class _PaywallViewState extends State<_PaywallView> {
                             });
                           },
                           child: Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(16),
