@@ -1,3 +1,28 @@
+# Fix for CocoaPods xcodeproj compatibility with Xcode 16+ (object version 70)
+require 'xcodeproj'
+if defined?(Xcodeproj::Constants)
+  module Xcodeproj
+    module Constants
+      # Remove frozen hashes
+      remove_const(:COMPATIBILITY_VERSION_BY_OBJECT_VERSION) if const_defined?(:COMPATIBILITY_VERSION_BY_OBJECT_VERSION)
+      remove_const(:OBJECT_VERSION_BY_COMPATIBILITY_VERSION) if const_defined?(:OBJECT_VERSION_BY_COMPATIBILITY_VERSION)
+      
+      COMPATIBILITY_VERSION_BY_OBJECT_VERSION = {
+        70 => "Xcode 16.0", 77 => "Xcode 16.0", 63 => "Xcode 15.3", 60 => "Xcode 15.0", 
+        56 => "Xcode 14.0", 55 => "Xcode 13.0", 54 => "Xcode 12.0", 53 => "Xcode 11.4", 
+        52 => "Xcode 11.0", 51 => "Xcode 10.0", 50 => "Xcode 9.3", 48 => "Xcode 8.0", 
+        47 => "Xcode 6.3", 46 => "Xcode 3.2", 45 => "Xcode 3.1"
+      }
+      OBJECT_VERSION_BY_COMPATIBILITY_VERSION = {
+        "Xcode 16.0" => 70, "Xcode 15.3" => 63, "Xcode 15.0" => 60, "Xcode 14.0" => 56, 
+        "Xcode 13.0" => 55, "Xcode 12.0" => 54, "Xcode 11.4" => 53, "Xcode 11.0" => 52, 
+        "Xcode 10.0" => 51, "Xcode 9.3" => 50, "Xcode 8.0" => 48, "Xcode 6.3" => 47, 
+        "Xcode 3.2" => 46, "Xcode 3.1" => 45
+      }
+    end
+  end
+end
+
 # Uncomment this line to define a global platform for your project
 platform :ios, '14.0'
 
