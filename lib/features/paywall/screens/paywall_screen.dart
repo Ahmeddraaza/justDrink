@@ -161,368 +161,335 @@ class _PaywallViewState extends State<_PaywallView> {
             ),
           ];
 
-          return Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/subs_screen_img.png',
-                        height: 65,
-                        fit: BoxFit.contain,
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    Image.asset(
+                      'assets/images/subs_screen_img.png',
+                      height: 65,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Unlock Your Ultimate Hydration',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.h2.copyWith(
+                        fontSize: 22,
+                        color: AppColors.heading,
+                        fontWeight: FontWeight.w900,
                       ),
-                      const SizedBox(height: 8),
-                      // Header Section - short, catchy one-liner
-                      Text(
-                        'Unlock Your Ultimate Hydration',
+                    ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Stay perfectly hydrated and healthy daily.',
                         textAlign: TextAlign.center,
-                        style: AppTextStyles.h2.copyWith(
-                          fontSize: 22,
-                          color: AppColors.heading,
-                          fontWeight: FontWeight.w900,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.body,
+                          fontSize: 14,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'Stay perfectly hydrated and healthy daily.',
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.body,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Premium Grid list (2 Columns) using exactly requested theme colors
-                      const Row(
-                        children: [
-                          Expanded(
-                            child: _PremiumGridItem(
-                              title: 'Remove Ads',
+                    ),
+                    const SizedBox(height: 14),
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      childAspectRatio: 3.2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      children: const [
+                        _FeatureTile(title: 'Remove Ads', icon: Icons.block_rounded),
+                        _FeatureTile(title: 'Custom Reminders', icon: Icons.notifications_active_rounded),
+                        _FeatureTile(title: 'Home Widget', icon: Icons.widgets_rounded),
+                        _FeatureTile(title: 'Custom Volumes', icon: Icons.water_drop_rounded),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    ...plans.map((plan) {
+                      final isSelected = _selectedPlanId == plan.id;
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedPlanId = plan.id),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected ? planAccent : const Color(0xFFE2E8F0),
+                              width: isSelected ? 2 : 1,
                             ),
+                            boxShadow: isSelected
+                                ? [BoxShadow(color: planAccent.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))]
+                                : null,
                           ),
-                          Expanded(
-                            child: _PremiumGridItem(
-                              title: 'Custom Reminders',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Row(
-                        children: [
-                          Expanded(
-                            child: _PremiumGridItem(
-                              title: 'Home Screen Widget',
-                            ),
-                          ),
-                          Expanded(
-                            child: _PremiumGridItem(
-                              title: 'Custom Log Volumes',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Plan list cards
-                      ...plans.map((plan) {
-                        final isSelected = _selectedPlanId == plan.id;
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedPlanId = plan.id;
-                            });
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected ? planAccent : const Color(0xFFE2E8F0),
-                                width: isSelected ? 2 : 1,
-                              ),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: planAccent.withOpacity(0.08),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 22,
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected ? planAccent : const Color(0xFF94A3B8),
+                                    width: 2,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: isSelected
+                                    ? Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: const BoxDecoration(color: planAccent, shape: BoxShape.circle),
                                       )
-                                    ]
-                                  : null,
-                            ),
-                            child: Row(
-                              children: [
-                                // Custom Radio design using 0C8AE4
-                                Container(
-                                  width: 22,
-                                  height: 22,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isSelected ? planAccent : const Color(0xFF94A3B8),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: isSelected
-                                      ? Container(
-                                          width: 12,
-                                          height: 12,
-                                          decoration: const BoxDecoration(
-                                            color: planAccent,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        plan.title,
-                                        style: AppTextStyles.bodyLarge.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.heading,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        plan.description,
-                                        style: AppTextStyles.bodySmall.copyWith(
-                                          color: isSelected ? planAccent : AppColors.body,
-                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                    : null,
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: planAccent.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        plan.badgeText,
-                                        style: const TextStyle(
-                                          color: planAccent,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    Text(
+                                      plan.title,
+                                      style: AppTextStyles.bodyLarge.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.heading,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      plan.priceText,
-                                      style: AppTextStyles.bodyLarge.copyWith(
-                                        color: AppColors.heading,
-                                        fontWeight: FontWeight.bold,
+                                      plan.description,
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: isSelected ? planAccent : AppColors.body,
+                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: planAccent.withOpacity(0.10),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      plan.badgeText,
+                                      style: const TextStyle(color: planAccent, fontSize: 11, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    plan.priceText,
+                                    style: AppTextStyles.bodyLarge.copyWith(
+                                      color: AppColors.heading,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        );
-                      }),
-                    ],
-                  ),
+                        ),
+                      );
+                    }),
+                  ]),
                 ),
               ),
 
-              // Bottom Button, Restore & Hyperlinks Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  children: [
-                    // Premium Gradient Button using 5DCCFC (planLight) & 0C8AE4 (planAccent)
-                    Container(
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: const LinearGradient(
-                          colors: [planLight, planAccent],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: planAccent.withOpacity(0.24),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          foregroundColor: Colors.white,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
+              // SliverFillRemaining: button section pins to bottom, zero artificial whitespace
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
+                            gradient: const LinearGradient(
+                              colors: [planLight, planAccent],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: planAccent.withOpacity(0.24),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          elevation: 0,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 0,
+                            ),
+                            onPressed: state.isPurchasing
+                                ? null
+                                : () {
+                                    final selectedPlan = plans.firstWhere((p) => p.id == _selectedPlanId);
+                                    if (selectedPlan.rawProduct != null) {
+                                      context.read<PurchaseCubit>().buyProduct(selectedPlan.rawProduct!);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Store is temporarily unavailable. Please try again.'),
+                                          backgroundColor: Color(0xFF0C8AE4),
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: state.isPurchasing
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                                  )
+                                : const Text(
+                                    'Subscribe Now',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                          ),
                         ),
-                        onPressed: state.isPurchasing
-                            ? null
-                            : () {
-                                final selectedPlan = plans.firstWhere((p) => p.id == _selectedPlanId);
-                                // Fix #2: Never use a fake ProductDetails — inform user if products unavailable
-                                if (selectedPlan.rawProduct != null) {
-                                  context.read<PurchaseCubit>().buyProduct(selectedPlan.rawProduct!);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Store is temporarily unavailable. Please try again.'),
-                                      backgroundColor: Color(0xFF0C8AE4),
-                                    ),
-                                  );
-                                }
-                              },
-                        child: state.isPurchasing
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Subscribe Now',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                        TextButton(
+                          onPressed: state.isPurchasing
+                              ? null
+                              : () => context.read<PurchaseCubit>().restore(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.body,
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                          ),
+                          child: const Text('Restore Purchases'),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            'Weekly & Yearly plans auto-renew until cancelled. '
+                            'Lifetime is a one-time purchase. '
+                            'Manage or cancel anytime in iPhone Settings → Apple ID → Subscriptions.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.body.withAlpha(160),
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => _launchURL('https://hanotech.net/terms'),
+                              child: Text(
+                                'Terms of Service',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.body,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    TextButton(
-                      onPressed: state.isPurchasing
-                          ? null
-                          : () => context.read<PurchaseCubit>().restore(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.body,
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                      ),
-                      child: const Text('Restore Purchases'),
-                    ),
-                    const SizedBox(height: 4),
-                    // Fix #6: Apple Guideline 3.1.2(b) — required auto-renewal & pricing disclosure
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        'Weekly & Yearly plans auto-renew until cancelled. '
-                        'Lifetime is a one-time purchase. '
-                        'Manage or cancel anytime in iPhone Settings → Apple ID → Subscriptions.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.body.withAlpha(160),
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    
-                    // Hyperlinks for Terms and Privacy Policy
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () => _launchURL('https://hanotech.net/terms'),
-                          child: Text(
-                            'Terms of Service',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.body,
-                              fontSize: 12,
-                              decoration: TextDecoration.underline,
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '•',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.body,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
-                          child: Text(
-                            'Privacy Policy',
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.body,
-                              fontSize: 12,
-                              decoration: TextDecoration.underline,
+                            const SizedBox(width: 8),
+                            Text('•', style: TextStyle(fontSize: 12, color: AppColors.body)),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
+                              child: Text(
+                                'Privacy Policy',
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.body,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
+                        const SizedBox(height: 4),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                  ],
+                  ),
                 ),
               ),
             ],
           );
+
         },
       ),
     );
   }
 }
 
-class _PremiumGridItem extends StatelessWidget {
+class _FeatureTile extends StatelessWidget {
   final String title;
+  final IconData icon;
 
-  const _PremiumGridItem({required this.title});
+  const _FeatureTile({required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(
-          Icons.check_circle_outline_rounded,
-          color: _PaywallViewState.planAccent,
-          size: 20,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C8AE4).withOpacity(0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF0C8AE4).withOpacity(0.14),
+          width: 1,
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            title,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.heading,
-              fontSize: 14,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF5DCCFC), Color(0xFF0C8AE4)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            child: Icon(icon, color: Colors.white, size: 15),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A2B4A),
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
 
 class _PlanOption {
   final String id;
