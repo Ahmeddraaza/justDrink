@@ -38,9 +38,9 @@ class _PaywallView extends StatefulWidget {
 class _PaywallViewState extends State<_PaywallView> {
   String _selectedPlanId = 'justdrink_pro_annual'; // Default selected plan
 
-  // Highly cohesive ocean blue matching the app's primary and wave colors
-  static const Color planAccent = AppColors.wave2;
-  static const Color planPrimaryLight = AppColors.primary;
+  // Vibrant branding colors requested: 5DCCFC (Sky Blue), 0C8AE4 (Deep Sky Blue) & White
+  static const Color planLight = Color(0xFF5DCCFC);
+  static const Color planAccent = Color(0xFF0C8AE4);
 
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
@@ -164,7 +164,7 @@ class _PaywallViewState extends State<_PaywallView> {
                       ),
                       const SizedBox(height: 28),
 
-                      // Premium Grid list (2 Columns)
+                      // Premium Grid list (2 Columns) using exactly requested theme colors
                       const Row(
                         children: [
                           Expanded(
@@ -227,7 +227,7 @@ class _PaywallViewState extends State<_PaywallView> {
                             ),
                             child: Row(
                               children: [
-                                // Custom Radio design matching screenshot
+                                // Custom Radio design using 0C8AE4
                                 Container(
                                   width: 22,
                                   height: 22,
@@ -316,13 +316,30 @@ class _PaywallViewState extends State<_PaywallView> {
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Column(
                   children: [
-                    SizedBox(
+                    // Premium Gradient Button using 5DCCFC (planLight) & 0C8AE4 (planAccent)
+                    Container(
                       width: double.infinity,
                       height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: const LinearGradient(
+                          colors: [planLight, planAccent],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: planAccent.withOpacity(0.24),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: planAccent,
+                          backgroundColor: Colors.transparent,
                           foregroundColor: Colors.white,
+                          shadowColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
