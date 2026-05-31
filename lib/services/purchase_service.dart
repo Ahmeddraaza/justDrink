@@ -8,8 +8,9 @@ class PurchaseService {
   final _purchaseController = StreamController<PurchaseResult>.broadcast();
 
   // Product IDs — must match exactly in Play Console and App Store Connect
-  static const productMonthly = 'justdrink_pro_monthly';  // $3.49/mo
-  static const productAnnual  = 'justdrink_pro_annual';   // $19.99/yr
+  static const productWeekly   = 'justdrink_pro_weekly';    // $0.99/wk
+  static const productAnnual   = 'justdrink_pro_annual';    // $19.99/yr
+  static const productLifetime = 'justdrink_pro_lifetime';  // $29.99 lifetime
 
   Stream<PurchaseResult> get purchaseResultStream => _purchaseController.stream;
 
@@ -22,7 +23,7 @@ class PurchaseService {
       onError: (e) => _purchaseController.add(PurchaseResult.error(e.toString())),
     );
 
-    final response = await _iap.queryProductDetails({productMonthly, productAnnual});
+    final response = await _iap.queryProductDetails({productWeekly, productAnnual, productLifetime});
     return response.productDetails;
   }
 
