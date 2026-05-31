@@ -11,6 +11,7 @@ import 'services/notification_service.dart';
 import 'services/widget_service.dart';
 import 'services/purchase_service.dart';
 import 'services/ad_service.dart';
+import 'data/database/daos/user_profile_dao.dart';
 import 'app.dart';
 
 void main() async {
@@ -64,6 +65,25 @@ void main() async {
   sl.registerSingleton<AdService>(adService);
   sl.registerSingleton<PurchaseService>(purchaseService);
   sl.registerSingleton<PreferencesService>(PreferencesService.instance);
+
+  // Healing check for premium status (migrates old profiles created with isPremium=true by default)
+  try {
+    final userProfileDao = sl<UserProfileDao>();
+    final profile = await userProfileDao.getProfile();
+    if (profile != null && profile.isPremium && (profile.premiumProductId == null || profile.premiumProductId!.isEmpty)) {
+      await userProfileDao.updatePremiumStatus(isPremium: false);
+      await PreferencesService.instance.setBool('is_premium', false);
+      
+      // Update widget state to reflect locked status
+      await widgetService.updateWidget(
+        currentMl: 0,
+        goalMl: profile.dailyGoalMl,
+        isPremium: false,
+      );
+    }
+  } catch (e) {
+    debugPrint('Failed to run premium status healing check: $e');
+  }
 
   runApp(const JustDrinkApp());
 }

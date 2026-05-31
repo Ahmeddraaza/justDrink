@@ -20,7 +20,7 @@ class UserProfile extends Table {
   // null = default "Time to drink water!"
   IntColumn get quickAdd1Ml => integer().withDefault(const Constant(250))();
   IntColumn get quickAdd2Ml => integer().withDefault(const Constant(500))();
-  BoolColumn get isPremium => boolean().withDefault(const Constant(true))();
+  BoolColumn get isPremium => boolean().withDefault(const Constant(false))();
   BoolColumn get onboardingComplete => boolean().withDefault(const Constant(false))();
   TextColumn get premiumProductId => text().nullable()();
   // stores the active subscription product ID
