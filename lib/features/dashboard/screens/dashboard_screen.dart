@@ -354,7 +354,13 @@ class _DashboardView extends StatelessWidget {
                           ),
                           const SizedBox(width: 16),
                           GestureDetector(
-                            onTap: () => _showSwitchCupDialog(context, state),
+                            onTap: () {
+                              if (state.isPremium) {
+                                _showSwitchCupDialog(context, state);
+                              } else {
+                                _showPremiumPopup(context, 'Custom Cup Sizes');
+                              }
+                            },
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
