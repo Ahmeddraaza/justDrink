@@ -20,19 +20,37 @@ class PaywallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PurchaseCubit(
-        purchaseService: GetIt.I<PurchaseService>(),
-        adCubit: context.read<AdCubit>(),
-        userProfileDao: GetIt.I<UserProfileDao>(),
-      )..initialize(),
-      child: const _PaywallView(),
+    return StreamBuilder<UserProfileData?>(
+      stream: GetIt.I<UserProfileDao>().watchProfile(),
+      builder: (context, snapshot) {
+        final profile = snapshot.data;
+        final isPremium = profile?.isPremium ?? false;
+        final activeProductId = profile?.premiumProductId;
+
+        return BlocProvider(
+          create: (context) => PurchaseCubit(
+            purchaseService: GetIt.I<PurchaseService>(),
+            adCubit: context.read<AdCubit>(),
+            userProfileDao: GetIt.I<UserProfileDao>(),
+          )..initialize(),
+          child: _PaywallView(
+            isPremium: isPremium,
+            activeProductId: activeProductId,
+          ),
+        );
+      },
     );
   }
 }
 
 class _PaywallView extends StatefulWidget {
-  const _PaywallView();
+  final bool isPremium;
+  final String? activeProductId;
+
+  const _PaywallView({
+    required this.isPremium,
+    this.activeProductId,
+  });
 
   @override
   State<_PaywallView> createState() => _PaywallViewState();
@@ -131,6 +149,10 @@ class _PaywallViewState extends State<_PaywallView> {
           }
         },
         builder: (context, state) {
+          if (widget.isPremium) {
+            return _buildActivePlanView(context);
+          }
+
           if (state.isLoading) {
             return const Center(
               child: CircularProgressIndicator(
@@ -479,6 +501,235 @@ class _PaywallViewState extends State<_PaywallView> {
 
         },
       ),
+    );
+  }
+
+  Widget _buildActivePlanView(BuildContext context) {
+    String planName = 'Premium Pro Active';
+    String billingInfo = 'Thank you for supporting JustDrink!';
+    
+    if (widget.activeProductId == 'justdrink_pro_weekly') {
+      planName = 'Weekly Pro Pass';
+      billingInfo = 'Auto-renews weekly. Manage anytime in App Store settings.';
+    } else if (widget.activeProductId == 'justdrink_pro_annual') {
+      planName = 'Annual Pro Pass';
+      billingInfo = 'Auto-renews annually. Manage anytime in App Store settings.';
+    } else if (widget.activeProductId == 'justdrink_pro_lifetime') {
+      planName = 'Lifetime Unlimited';
+      billingInfo = 'One-time purchase. Enjoy lifetime premium access!';
+    }
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Gorgeous premium golden & blue crown badge
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF5DCCFC), Color(0xFF0C8AE4)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0C8AE4).withOpacity(0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.workspace_premium_rounded,
+                color: Colors.white,
+                size: 56,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "You're a PRO Member!",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.heading,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0C8AE4).withOpacity(0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: const Color(0xFF0C8AE4).withOpacity(0.2),
+                ),
+              ),
+              child: Text(
+                planName,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0C8AE4),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                billingInfo,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: AppColors.body.withOpacity(0.8),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // Features Unlocked Checklist
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'YOUR PREMIUM BENEFITS:',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.body.withOpacity(0.6),
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildBenefitRow(
+              icon: Icons.block_rounded,
+              title: 'Ad-Free Experience',
+              description: 'Zero distraction, complete screen real estate.',
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitRow(
+              icon: Icons.water_drop_rounded,
+              title: 'Custom Drink Sizes',
+              description: 'Customize quick-add buttons to fit your custom bottles.',
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitRow(
+              icon: Icons.notifications_active_rounded,
+              title: '10 Smart Spaced Reminders',
+              description: 'Stay hydrated with fully spacing notifications.',
+            ),
+            const SizedBox(height: 12),
+            _buildBenefitRow(
+              icon: Icons.widgets_rounded,
+              title: 'Home Screen Widgets',
+              description: 'Access beautiful widget designs directly on your home.',
+            ),
+            const SizedBox(height: 40),
+
+            // Action CTAs
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0C8AE4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                onPressed: () => _launchURL('https://apps.apple.com/account/subscriptions'),
+                child: Text(
+                  'Manage Subscription',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go(Routes.dashboard);
+                }
+              },
+              child: Text(
+                'Back to Dashboard',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.body,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBenefitRow({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0C8AE4).withOpacity(0.08),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            color: const Color(0xFF0C8AE4),
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.heading,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: AppColors.body.withOpacity(0.8),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

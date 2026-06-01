@@ -73,6 +73,14 @@ void main() async {
   sl.registerSingleton<PurchaseService>(purchaseService);
   sl.registerSingleton<PreferencesService>(PreferencesService.instance);
 
+  // Verifies and auto-expires premium if active subscription ended
+  try {
+    final purchaseService = sl<PurchaseService>();
+    await purchaseService.checkExistingPremium();
+  } catch (e) {
+    debugPrint('Failed to check existing premium on launch: $e');
+  }
+
   // Healing check for premium status (migrates old profiles created with isPremium=true by default)
   try {
     final userProfileDao = sl<UserProfileDao>();
