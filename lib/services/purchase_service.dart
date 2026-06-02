@@ -137,7 +137,21 @@ class PurchaseService {
     }
 
     final purchaseTimeMs = PreferencesService.instance.getInt('premium_purchase_time');
-    if (purchaseTimeMs == null) return true; // fallback
+    if (purchaseTimeMs == null) {
+      // Purchase was made before timestamp tracking was introduced.
+      // Do a silent StoreKit restore to let the OS verify if subscription is still active.
+      // If nothing comes back within 6 seconds, the subscription has expired.
+      final isStillActive = await _verifySilentRestore(productId);
+      if (!isStillActive) {
+        await _expirePremium();
+        return false;
+      }
+      // Subscription confirmed active — stamp the time now so future checks use elapsed time
+      await PreferencesService.instance.setInt(
+        'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
+      );
+      return true;
+    }
 
     final purchaseTime = DateTime.fromMillisecondsSinceEpoch(purchaseTimeMs);
     final elapsed = DateTime.now().difference(purchaseTime);
@@ -158,10 +172,9 @@ class PurchaseService {
 
     if (productId == productWeekly) {
       if (isSandbox) {
-        // In iOS Sandbox/TestFlight, weekly plan auto-renews every 3 minutes.
-        // If the subscription is cancelled, it expires after exactly 3 minutes.
-        // We use 3 minutes and 30 seconds (210 seconds) to avoid any race conditions with purchase processing.
-        if (elapsed.inSeconds > 210) {
+        // In iOS Sandbox/TestFlight, weekly plan auto-renews up to 5 times (each is 3 mins)
+        // So total duration is maximum 15-20 minutes. After 30 minutes, it is 100% expired.
+        if (elapsed.inMinutes > 30) {
           await _expirePremium();
           return false;
         }
@@ -174,9 +187,8 @@ class PurchaseService {
       }
     } else if (productId == productAnnual) {
       if (isSandbox) {
-        // In iOS Sandbox, yearly plan auto-renews every 1 hour (60 minutes).
-        // If cancelled, it expires after 60 minutes. We give a 2-minute buffer.
-        if (elapsed.inMinutes > 62) {
+        // In iOS Sandbox, yearly plan auto-renews and expires in 1 hour
+        if (elapsed.inHours > 2) {
           await _expirePremium();
           return false;
         }
@@ -190,6 +202,46 @@ class PurchaseService {
     }
 
     return true;
+  }
+
+  /// Silently calls StoreKit restorePurchases and waits up to 6 seconds for
+  /// a restored transaction matching [expectedProductId]. Returns true only if
+  /// an active matching subscription is confirmed by the OS.
+  Future<bool> _verifySilentRestore(String expectedProductId) async {
+    final completer = Completer<bool>();
+
+    StreamSubscription? sub;
+    sub = _iap.purchaseStream.listen((purchases) async {
+      for (final purchase in purchases) {
+        if (purchase.status == PurchaseStatus.restored &&
+            purchase.productID == expectedProductId) {
+          if (purchase.pendingCompletePurchase) {
+            await _iap.completePurchase(purchase);
+          }
+          // Update the timestamp so future checks work correctly
+          await PreferencesService.instance.setInt(
+            'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
+          );
+          if (!completer.isCompleted) completer.complete(true);
+        }
+      }
+    });
+
+    try {
+      await _iap.restorePurchases();
+      // Wait up to 6 seconds for a matching restored transaction
+      await completer.future.timeout(
+        const Duration(seconds: 6),
+        onTimeout: () {
+          if (!completer.isCompleted) completer.complete(false);
+        },
+      );
+    } catch (_) {
+      if (!completer.isCompleted) completer.complete(false);
+    }
+
+    await sub.cancel();
+    return completer.future;
   }
 
   Future<void> _expirePremium() async {
