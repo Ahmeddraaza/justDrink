@@ -172,11 +172,19 @@ class PurchaseService {
 
     if (productId == productWeekly) {
       if (isSandbox) {
-        // In iOS Sandbox/TestFlight, weekly plan auto-renews up to 5 times (each is 3 mins)
-        // So total duration is maximum 15-20 minutes. After 30 minutes, it is 100% expired.
-        if (elapsed.inMinutes > 30) {
-          await _expirePremium();
-          return false;
+        // In Sandbox, each billing period is ~3 minutes.
+        // After 5 minutes (one period + buffer), verify with StoreKit directly
+        // so cancelled subscriptions are detected within one billing cycle.
+        if (elapsed.inMinutes > 5) {
+          final isStillActive = await _verifySilentRestore(productId);
+          if (!isStillActive) {
+            await _expirePremium();
+            return false;
+          }
+          // Still active — refresh the timestamp to the current moment
+          await PreferencesService.instance.setInt(
+            'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
+          );
         }
       } else {
         // Production Weekly expires after 7 days
@@ -187,10 +195,16 @@ class PurchaseService {
       }
     } else if (productId == productAnnual) {
       if (isSandbox) {
-        // In iOS Sandbox, yearly plan auto-renews and expires in 1 hour
-        if (elapsed.inHours > 2) {
-          await _expirePremium();
-          return false;
+        // In Sandbox, annual period is ~60 minutes. Verify after 10 minutes.
+        if (elapsed.inMinutes > 10) {
+          final isStillActive = await _verifySilentRestore(productId);
+          if (!isStillActive) {
+            await _expirePremium();
+            return false;
+          }
+          await PreferencesService.instance.setInt(
+            'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
+          );
         }
       } else {
         // Production Yearly expires after 365 days
