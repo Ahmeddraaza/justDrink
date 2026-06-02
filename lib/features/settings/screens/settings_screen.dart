@@ -149,7 +149,7 @@ class _SettingsView extends StatelessWidget {
               _SectionHeader(title: 'App Settings'),
               SettingsCard(
                 title: 'Subscription',
-                subtitle: profile.isPremium ? 'Active' : 'Upgrade to Freemium',
+                subtitle: profile.isPremium ? 'Active' : 'Upgrade to premium',
                 icon: Icons.star_border_outlined,
                 onTap: () => context.push(Routes.paywall),
               ),

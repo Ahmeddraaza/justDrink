@@ -158,9 +158,10 @@ class PurchaseService {
 
     if (productId == productWeekly) {
       if (isSandbox) {
-        // In iOS Sandbox/TestFlight, weekly plan auto-renews up to 5 times (each is 3 mins)
-        // So total duration is maximum 15-20 minutes. After 30 minutes, it is 100% expired.
-        if (elapsed.inMinutes > 30) {
+        // In iOS Sandbox/TestFlight, weekly plan auto-renews every 3 minutes.
+        // If the subscription is cancelled, it expires after exactly 3 minutes.
+        // We use 3 minutes and 30 seconds (210 seconds) to avoid any race conditions with purchase processing.
+        if (elapsed.inSeconds > 210) {
           await _expirePremium();
           return false;
         }
@@ -173,8 +174,9 @@ class PurchaseService {
       }
     } else if (productId == productAnnual) {
       if (isSandbox) {
-        // In iOS Sandbox, yearly plan auto-renews and expires in 1 hour
-        if (elapsed.inHours > 2) {
+        // In iOS Sandbox, yearly plan auto-renews every 1 hour (60 minutes).
+        // If cancelled, it expires after 60 minutes. We give a 2-minute buffer.
+        if (elapsed.inMinutes > 62) {
           await _expirePremium();
           return false;
         }
