@@ -232,16 +232,14 @@ class PurchaseService {
       // Wait up to 6 seconds for a matching restored transaction
       await completer.future.timeout(
         const Duration(seconds: 6),
-        onTimeout: () {
-          if (!completer.isCompleted) completer.complete(false);
-        },
+        onTimeout: () => false,
       );
     } catch (_) {
       if (!completer.isCompleted) completer.complete(false);
     }
 
     await sub.cancel();
-    return completer.future;
+    return completer.isCompleted ? await completer.future : false;
   }
 
   Future<void> _expirePremium() async {
