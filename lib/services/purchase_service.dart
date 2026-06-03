@@ -125,135 +125,46 @@ class PurchaseService {
 
   static const _envChannel = MethodChannel('com.hanotech.justdrink/environment');
 
+  /// Asks the native iOS layer (StoreKit 2) whether any of our subscription
+  /// product IDs have an active, non-revoked entitlement right now.
+  /// StoreKit 2's Transaction.currentEntitlements is the ONLY reliable
+  /// client-side way to check — StoreKit 1's restorePurchases returns expired
+  /// transactions with 'restored' status, making it useless for expiry detection.
+  Future<bool> _hasActiveSubscription() async {
+    try {
+      if (!Platform.isIOS) return true; // Android — skip for now
+      final result = await _envChannel.invokeMethod<bool>(
+        'hasActiveSubscription',
+        [productWeekly, productAnnual, productLifetime],
+      );
+      return result ?? false;
+    } catch (e) {
+      debugPrint('StoreKit 2 entitlement check failed: $e');
+      // If the native call fails (e.g. iOS < 15), don't expire — be safe
+      return true;
+    }
+  }
+
   Future<bool> checkExistingPremium() async {
     final isPremium = PreferencesService.instance.getBool('is_premium') ?? false;
     if (!isPremium) return false;
 
     final productId = PreferencesService.instance.getString('premium_product_id');
-    if (productId == null) return true; // fallback
+    if (productId == null) return false;
 
+    // Lifetime never expires
     if (productId == productLifetime) {
-      return true; // Lifetime never expires
-    }
-
-    final purchaseTimeMs = PreferencesService.instance.getInt('premium_purchase_time');
-    if (purchaseTimeMs == null) {
-      // Purchase was made before timestamp tracking was introduced.
-      // Do a silent StoreKit restore to let the OS verify if subscription is still active.
-      // If nothing comes back within 6 seconds, the subscription has expired.
-      final isStillActive = await _verifySilentRestore(productId);
-      if (!isStillActive) {
-        await _expirePremium();
-        return false;
-      }
-      // Subscription confirmed active — stamp the time now so future checks use elapsed time
-      await PreferencesService.instance.setInt(
-        'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
-      );
       return true;
     }
 
-    final purchaseTime = DateTime.fromMillisecondsSinceEpoch(purchaseTimeMs);
-    final elapsed = DateTime.now().difference(purchaseTime);
-
-    // Determine sandbox environment (iOS TestFlight / Simulator or Android Emulator)
-    bool isSandbox = false;
-    try {
-      if (Platform.isIOS) {
-        final result = await _envChannel.invokeMethod<bool>('isSandbox');
-        isSandbox = result ?? false;
-      } else {
-        // Android Emulator / Debug
-        isSandbox = const bool.fromEnvironment('dart.vm.product') == false;
-      }
-    } catch (_) {
-      isSandbox = const bool.fromEnvironment('dart.vm.product') == false;
-    }
-
-    if (productId == productWeekly) {
-      if (isSandbox) {
-        // In Sandbox, each billing period is ~3 minutes.
-        // After 5 minutes (one period + buffer), verify with StoreKit directly
-        // so cancelled subscriptions are detected within one billing cycle.
-        if (elapsed.inMinutes > 5) {
-          final isStillActive = await _verifySilentRestore(productId);
-          if (!isStillActive) {
-            await _expirePremium();
-            return false;
-          }
-          // Still active — refresh the timestamp to the current moment
-          await PreferencesService.instance.setInt(
-            'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
-          );
-        }
-      } else {
-        // Production Weekly expires after 7 days
-        if (elapsed.inDays > 7) {
-          await _expirePremium();
-          return false;
-        }
-      }
-    } else if (productId == productAnnual) {
-      if (isSandbox) {
-        // In Sandbox, annual period is ~60 minutes. Verify after 10 minutes.
-        if (elapsed.inMinutes > 10) {
-          final isStillActive = await _verifySilentRestore(productId);
-          if (!isStillActive) {
-            await _expirePremium();
-            return false;
-          }
-          await PreferencesService.instance.setInt(
-            'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
-          );
-        }
-      } else {
-        // Production Yearly expires after 365 days
-        if (elapsed.inDays > 365) {
-          await _expirePremium();
-          return false;
-        }
-      }
+    // Ask StoreKit 2 directly: is there a genuinely active subscription?
+    final isActive = await _hasActiveSubscription();
+    if (!isActive) {
+      await _expirePremium();
+      return false;
     }
 
     return true;
-  }
-
-  /// Silently calls StoreKit restorePurchases and waits up to 6 seconds for
-  /// a restored transaction matching [expectedProductId]. Returns true only if
-  /// an active matching subscription is confirmed by the OS.
-  Future<bool> _verifySilentRestore(String expectedProductId) async {
-    final completer = Completer<bool>();
-
-    StreamSubscription? sub;
-    sub = _iap.purchaseStream.listen((purchases) async {
-      for (final purchase in purchases) {
-        if (purchase.status == PurchaseStatus.restored &&
-            purchase.productID == expectedProductId) {
-          if (purchase.pendingCompletePurchase) {
-            await _iap.completePurchase(purchase);
-          }
-          // Update the timestamp so future checks work correctly
-          await PreferencesService.instance.setInt(
-            'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
-          );
-          if (!completer.isCompleted) completer.complete(true);
-        }
-      }
-    });
-
-    try {
-      await _iap.restorePurchases();
-      // Wait up to 6 seconds for a matching restored transaction
-      await completer.future.timeout(
-        const Duration(seconds: 6),
-        onTimeout: () => false,
-      );
-    } catch (_) {
-      if (!completer.isCompleted) completer.complete(false);
-    }
-
-    await sub.cancel();
-    return completer.isCompleted ? await completer.future : false;
   }
 
   Future<void> _expirePremium() async {
