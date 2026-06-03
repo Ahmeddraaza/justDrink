@@ -80,8 +80,7 @@ class PurchaseService {
     for (final purchase in purchases) {
       switch (purchase.status) {
         case PurchaseStatus.purchased:
-        case PurchaseStatus.restored:
-          // Apple REQUIRES completePurchase to be called, even on restore
+          // Fresh purchase — trust it immediately
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
           }
@@ -93,6 +92,31 @@ class PurchaseService {
             'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
           );
           _purchaseController.add(PurchaseResult.success(purchase.productID));
+          break;
+
+        case PurchaseStatus.restored:
+          // Apple REQUIRES completePurchase even for expired restored transactions
+          if (purchase.pendingCompletePurchase) {
+            await _iap.completePurchase(purchase);
+          }
+          // StoreKit 1 returns ALL past transactions including expired ones
+          // with 'restored' status. Validate with StoreKit 2 before granting.
+          final isActive = await _hasActiveSubscription();
+          if (isActive) {
+            await PreferencesService.instance.setBool('is_premium', true);
+            await PreferencesService.instance.setString(
+              'premium_product_id', purchase.productID,
+            );
+            await PreferencesService.instance.setInt(
+              'premium_purchase_time', DateTime.now().millisecondsSinceEpoch,
+            );
+            _purchaseController.add(PurchaseResult.success(purchase.productID));
+          } else {
+            // Subscription expired/cancelled — do NOT grant premium
+            _purchaseController.add(
+              PurchaseResult.error('Your subscription has expired. Please subscribe again to restore Premium.'),
+            );
+          }
           break;
 
         case PurchaseStatus.error:
