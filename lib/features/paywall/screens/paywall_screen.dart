@@ -129,22 +129,12 @@ class _PaywallViewState extends State<_PaywallView> {
             }
           }
           if (!state.purchaseSuccess && state.feedbackMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.feedbackMessage!),
-                backgroundColor: planAccent,
-              ),
-            );
+            _showCustomSnackBar(context, state.feedbackMessage!, isError: false);
             // Consume the message so it can never replay on next state change
             context.read<PurchaseCubit>().clearMessages();
           }
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            _showCustomSnackBar(context, state.errorMessage!, isError: true);
             // Consume the error so it can never replay on next state change
             context.read<PurchaseCubit>().clearMessages();
           }
@@ -731,6 +721,103 @@ class _PaywallViewState extends State<_PaywallView> {
           ),
         ),
       ],
+    );
+  }
+
+  String _getCleanErrorMessage(String rawMessage) {
+    final msg = rawMessage.toLowerCase();
+    
+    // Check for offline/no internet/connection errors
+    if (msg.contains('nsurlerrordomain') ||
+        msg.contains('network') ||
+        msg.contains('connection') ||
+        msg.contains('offline') ||
+        msg.contains('socketexception') ||
+        msg.contains('http') ||
+        msg.contains('no internet') ||
+        msg.contains('timed out') ||
+        msg.contains('timeout')) {
+      return 'Connection Error. Please check your internet connection and try again.';
+    }
+
+    // Check for Apple/StoreKit or billing specific errors
+    if (msg.contains('storekit') ||
+        msg.contains('itunes') ||
+        msg.contains('billing') ||
+        msg.contains('play store') ||
+        msg.contains('app store')) {
+      return 'Unable to connect to the App Store. Please check your network or Apple ID settings.';
+    }
+
+    if (msg.contains('already owned') || msg.contains('already purchased')) {
+      return 'You already own this item. Please use the Restore button to retrieve your access.';
+    }
+
+    if (msg.contains('cancelled') || msg.contains('cancel') || msg.contains('user_cancelled')) {
+      return 'The transaction was cancelled.';
+    }
+
+    // Return the message as is if it's already a clean user-facing sentence
+    if (rawMessage.length > 50 || rawMessage.contains(' ')) {
+      return rawMessage;
+    }
+
+    // Default general fallback
+    return 'Purchase failed. Please check your connection and try again.';
+  }
+
+  void _showCustomSnackBar(BuildContext context, String message, {bool isError = false}) {
+    final cleanedMessage = isError ? _getCleanErrorMessage(message) : message;
+    
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        elevation: 6,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        padding: EdgeInsets.zero,
+        margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+        duration: const Duration(seconds: 4),
+        content: Container(
+          decoration: BoxDecoration(
+            color: AppColors.heading,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isError ? Colors.amber.withOpacity(0.3) : planLight.withOpacity(0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                isError ? Icons.warning_amber_rounded : Icons.check_circle_outline_rounded,
+                color: isError ? Colors.amber : planLight,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  cleanedMessage,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
