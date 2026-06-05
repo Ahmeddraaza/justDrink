@@ -10,11 +10,9 @@ class AdCubit extends Cubit<AdState> {
   void initialize(bool isPremium) {
     emit(state.copyWith(isPremium: isPremium));
     if (!isPremium) {
-      adService.onBannerLoaded = () => emit(state.copyWith(isBannerLoaded: true));
       adService.onInterstitialLoaded = () => emit(state.copyWith(isInterstitialLoaded: true));
       adService.onInterstitialClosed = () => emit(state.copyWith(isInterstitialShowing: false));
       
-      adService.loadBanner();
       adService.loadInterstitial();
     }
   }
