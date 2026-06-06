@@ -39,8 +39,7 @@ class JustDrinkApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => AdCubit(adService: GetIt.I<AdService>())
-            ..initialize(GetIt.I<PreferencesService>().isPremium),
+          create: (context) => AdCubit(adService: GetIt.I<AdService>()),
         ),
         BlocProvider(
           create: (context) => NotificationCubit(

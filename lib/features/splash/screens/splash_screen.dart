@@ -7,7 +7,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/preferences/preferences_service.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
-
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../shared/cubits/ad/ad_cubit.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -35,15 +37,34 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 3));
+    // Wait for the first frame to render before showing ATT prompt
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    try {
+      if (Theme.of(context).platform == TargetPlatform.iOS) {
+        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+        if (status == TrackingStatus.notDetermined) {
+          await AppTrackingTransparency.requestTrackingAuthorization();
+        }
+      }
+    } catch (e) {
+      debugPrint('ATT request failed: $e');
+    }
+
+    if (!mounted) return;
+    final prefs = GetIt.I<PreferencesService>();
+    final profile = await GetIt.I<UserProfileDao>().getProfile();
+    final isPremium = profile?.isPremium ?? false;
+
+    // Initialize AdCubit AFTER ATT prompt is handled
+    context.read<AdCubit>().initialize(isPremium);
+
+    await Future.delayed(const Duration(milliseconds: 2500));
     if (!mounted) return;
 
-    final prefs = GetIt.I<PreferencesService>();
     if (!prefs.isOnboardingComplete) {
       context.go(Routes.onboardingIntro);
     } else {
-      final profile = await GetIt.I<UserProfileDao>().getProfile();
-      final isPremium = profile?.isPremium ?? false;
       if (!isPremium) {
         context.go(Routes.paywall);
       } else {
