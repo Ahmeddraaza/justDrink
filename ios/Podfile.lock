@@ -1,6 +1,8 @@
 PODS:
   - app_settings (5.1.1):
     - Flutter
+  - app_tracking_transparency (0.0.1):
+    - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - Firebase/Analytics (11.15.0):
@@ -163,6 +165,7 @@ PODS:
 
 DEPENDENCIES:
   - app_settings (from `.symlinks/plugins/app_settings/ios`)
+  - app_tracking_transparency (from `.symlinks/plugins/app_tracking_transparency/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - firebase_analytics (from `.symlinks/plugins/firebase_analytics/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -198,6 +201,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   app_settings:
     :path: ".symlinks/plugins/app_settings/ios"
+  app_tracking_transparency:
+    :path: ".symlinks/plugins/app_tracking_transparency/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   firebase_analytics:
@@ -231,6 +236,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   app_settings: 5127ae0678de1dcc19f2293271c51d37c89428b2
+  app_tracking_transparency: 3d84f147f67ca82d3c15355c36b1fa6b66ca7c92
   device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
   firebase_analytics: 0e25ca1d4001ccedd40b4e5b74c0ec34e18f6425
