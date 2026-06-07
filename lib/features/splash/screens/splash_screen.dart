@@ -10,6 +10,7 @@ import '../../../data/database/daos/user_profile_dao.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:async';
 import '../../../shared/cubits/ad/ad_cubit.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -43,11 +44,27 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     // 1. Google UMP Consent for EEA/UK
     try {
+      final completer = Completer<void>();
       final params = ConsentRequestParameters();
-      await ConsentInformation.instance.requestConsentInfoUpdate(params);
-      if (await ConsentInformation.instance.isConsentFormAvailable()) {
-        await ConsentForm.loadAndShowConsentFormIfRequired();
-      }
+      
+      ConsentInformation.instance.requestConsentInfoUpdate(
+        params,
+        () async {
+          if (await ConsentInformation.instance.isConsentFormAvailable()) {
+            ConsentForm.loadAndShowConsentFormIfRequired((FormError? formError) {
+              completer.complete();
+            });
+          } else {
+            completer.complete();
+          }
+        },
+        (FormError error) {
+          debugPrint('UMP consent info update failed: ${error.message}');
+          completer.complete();
+        },
+      );
+      
+      await completer.future;
     } catch (e) {
       debugPrint('UMP consent request failed: $e');
     }
