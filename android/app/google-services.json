@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "858953407669",
+    "project_id": "hanotech-apps",
+    "storage_bucket": "hanotech-apps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:858953407669:android:356ea3fa0278c0efb4b2fc",
+        "android_client_info": {
+          "package_name": "com.hanotech.justdrinkfreemium"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAi9DbsHbcv3k2ZSXA7tFybEtqz6_GMZQA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

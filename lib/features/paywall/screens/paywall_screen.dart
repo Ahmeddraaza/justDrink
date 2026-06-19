@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -240,6 +241,7 @@ class _PaywallViewState extends State<_PaywallView> {
                         _FeatureTile(title: 'Custom Drink Sizes', icon: Icons.water_drop_rounded),
                       ],
                     ),
+                    const SizedBox(height: 16),
                     ...plans.map((plan) {
                       final isSelected = _selectedPlanId == plan.id;
                       return GestureDetector(
@@ -499,12 +501,13 @@ class _PaywallViewState extends State<_PaywallView> {
     String planName = 'Premium Pro Active';
     String billingInfo = 'Thank you for supporting JustDrink!';
     
+    final storeLabel = Platform.isAndroid ? 'Google Play' : 'App Store';
     if (widget.activeProductId == 'justdrink_pro_weekly') {
       planName = 'Weekly Pro Pass';
-      billingInfo = 'Auto-renews weekly. Manage anytime in App Store settings.';
+      billingInfo = 'Auto-renews weekly. Manage anytime in $storeLabel settings.';
     } else if (widget.activeProductId == 'justdrink_pro_annual') {
       planName = 'Annual Pro Pass';
-      billingInfo = 'Auto-renews annually. Manage anytime in App Store settings.';
+      billingInfo = 'Auto-renews annually. Manage anytime in $storeLabel settings.';
     } else if (widget.activeProductId == 'justdrink_pro_lifetime') {
       planName = 'Lifetime Unlimited';
       billingInfo = 'One-time purchase. Enjoy lifetime premium access!';
@@ -638,7 +641,11 @@ class _PaywallViewState extends State<_PaywallView> {
                   ),
                   elevation: 0,
                 ),
-                onPressed: () => _launchURL('https://apps.apple.com/account/subscriptions'),
+                onPressed: () => _launchURL(
+                  Platform.isAndroid
+                    ? 'https://play.google.com/store/account/subscriptions'
+                    : 'https://apps.apple.com/account/subscriptions'
+                ),
                 child: Text(
                   'Manage Subscription',
                   style: GoogleFonts.plusJakartaSans(
@@ -740,12 +747,15 @@ class _PaywallViewState extends State<_PaywallView> {
       return 'Connection Error. Please check your internet connection and try again.';
     }
 
-    // Check for Apple/StoreKit or billing specific errors
+    // Check for store/billing specific errors — platform-aware messaging
     if (msg.contains('storekit') ||
         msg.contains('itunes') ||
         msg.contains('billing') ||
         msg.contains('play store') ||
         msg.contains('app store')) {
+      if (Platform.isAndroid) {
+        return 'Unable to connect to Google Play. Please check your network or Google account settings.';
+      }
       return 'Unable to connect to the App Store. Please check your network or Apple ID settings.';
     }
 

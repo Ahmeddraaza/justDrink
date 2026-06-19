@@ -145,7 +145,7 @@ class _SettingsView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               _SectionHeader(title: 'App Settings'),
               SettingsCard(
                 title: 'Subscription',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
@@ -7,10 +8,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/preferences/preferences_service.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
-import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'dart:async';
 import '../../../shared/cubits/ad/ad_cubit.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -41,53 +40,35 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _navigateToNext() async {
     // Wait for the first frame to render before showing prompts
     await Future.delayed(const Duration(milliseconds: 500));
-    
-    // 1. Google UMP Consent for EEA/UK
-    try {
-      final completer = Completer<void>();
-      final params = ConsentRequestParameters();
-      
-      ConsentInformation.instance.requestConsentInfoUpdate(
-        params,
-        () async {
-          if (await ConsentInformation.instance.isConsentFormAvailable()) {
-            ConsentForm.loadAndShowConsentFormIfRequired((FormError? formError) {
-              completer.complete();
-            });
-          } else {
-            completer.complete();
-          }
-        },
-        (FormError error) {
-          debugPrint('UMP consent info update failed: ${error.message}');
-          completer.complete();
-        },
-      );
-      
-      await completer.future;
-    } catch (e) {
-      debugPrint('UMP consent request failed: $e');
-    }
-
-    // 2. Apple ATT Prompt
-    try {
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
-        final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-        if (status == TrackingStatus.notDetermined) {
-          await AppTrackingTransparency.requestTrackingAuthorization();
-        }
-      }
-    } catch (e) {
-      debugPrint('ATT request failed: $e');
-    }
-
     if (!mounted) return;
+
+    // ── STEP 1: Google UMP / CMP Consent Form ─────────────────────────────────
+    // This shows the GDPR consent dialog (as seen in the screenshot) for EEA/UK
+    // users. For non-EEA users it completes immediately.
+    // IMPORTANT: Must run BEFORE MobileAds.initialize() per Google policy.
+    await _requestUmpConsent();
+    if (!mounted) return;
+
+    // ── STEP 2: Initialize MobileAds SDK ──────────────────────────────────────
+    // ATT is handled in main() before NotificationService starts (ensures ATT
+    // fires before notification permission on every fresh install).
+    // UMP consent (Step 1 above) is done — safe to initialize AdMob now.
+    try {
+      await MobileAds.instance.initialize();
+      debugPrint('[Splash] MobileAds SDK initialized after consent.');
+    } catch (e) {
+      debugPrint('[Splash] MobileAds init failed: $e');
+    }
+    if (!mounted) return;
+
+    // ── STEP 4: Load user profile & start ad loading ──────────────────────────
     final prefs = GetIt.I<PreferencesService>();
+    final adCubit = context.read<AdCubit>(); // cache before async gap
     final profile = await GetIt.I<UserProfileDao>().getProfile();
     final isPremium = profile?.isPremium ?? false;
 
-    // Initialize AdCubit AFTER ATT prompt is handled
-    context.read<AdCubit>().initialize(isPremium);
+    // AdCubit.initialize now only loads ads (SDK already initialized above)
+    adCubit.initialize(isPremium);
 
     await Future.delayed(const Duration(milliseconds: 2500));
     if (!mounted) return;
@@ -100,6 +81,58 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       } else {
         context.go(Routes.dashboard);
       }
+    }
+  }
+
+  /// Requests UMP consent info and shows the CMP form if required.
+  /// Completes immediately for non-EEA/UK users (form not available).
+  Future<void> _requestUmpConsent() async {
+    final completer = Completer<void>();
+
+    try {
+      final params = ConsentRequestParameters();
+
+      ConsentInformation.instance.requestConsentInfoUpdate(
+        params,
+        () async {
+          // Success callback — check if a form needs to be shown
+          try {
+            final formAvailable =
+                await ConsentInformation.instance.isConsentFormAvailable();
+            if (formAvailable) {
+              if (!mounted) {
+                completer.complete();
+                return;
+              }
+              ConsentForm.loadAndShowConsentFormIfRequired(
+                (FormError? formError) {
+                  if (formError != null) {
+                    debugPrint(
+                        '[UMP] Form error: ${formError.errorCode} — ${formError.message}');
+                  }
+                  completer.complete();
+                },
+              );
+            } else {
+              // No form required (non-EEA user or already consented)
+              debugPrint('[UMP] Consent form not available — skipping.');
+              completer.complete();
+            }
+          } catch (e) {
+            debugPrint('[UMP] Error checking/loading form: $e');
+            completer.complete();
+          }
+        },
+        (FormError error) {
+          debugPrint(
+              '[UMP] requestConsentInfoUpdate failed: ${error.message}');
+          completer.complete();
+        },
+      );
+
+      await completer.future;
+    } catch (e) {
+      debugPrint('[UMP] Unexpected error: $e');
     }
   }
 
@@ -126,7 +159,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               children: [
                  // Logo
                 Image.asset(
-                  'assets/images/logoicon.png',
+                  'assets/icons/icon.svg',
                   width: 120,
                   height: 120,
                 ),

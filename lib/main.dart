@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 import 'data/preferences/preferences_service.dart';
 import 'services/database_service.dart';
@@ -32,7 +34,7 @@ void main() async {
   try {
     tz.initializeTimeZones();
     final localTimezone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 2));
-    tz.setLocalLocation(tz.getLocation(localTimezone));
+    tz.setLocalLocation(tz.getLocation(localTimezone.identifier));
   } catch (e) {
     tz.setLocalLocation(tz.getLocation('UTC'));
   }
@@ -40,6 +42,27 @@ void main() async {
   await PreferencesService.instance.initialize();
 
   await DatabaseService.initialize();
+
+  // ── ATT Pre-flight (iOS only) ────────────────────────────────────────────
+  // MUST run before NotificationService.initialize() because flutter_local_
+  // notifications triggers the iOS notification permission request during its
+  // own initialize() call. If notification permission fires first, ATT gets
+  // pushed to the NEXT app launch (the bug). Running ATT here, synchronously
+  // in main(), guarantees it always appears FIRST on fresh installs.
+  if (Platform.isIOS) {
+    try {
+      // Wait for the engine to be ready before showing a system dialog.
+      await Future.delayed(const Duration(milliseconds: 200));
+      final attStatus =
+          await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (attStatus == TrackingStatus.notDetermined) {
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+      debugPrint('[main] ATT status: $attStatus');
+    } catch (e) {
+      debugPrint('[main] ATT pre-flight failed: $e');
+    }
+  }
 
   final notificationService = NotificationService();
   try {

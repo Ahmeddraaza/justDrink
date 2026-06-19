@@ -1,7 +1,7 @@
 name: justdrink
-description: "JustDrink — Hyper-minimalist hydration tracker"
+description: "JustDrink — Water Reminder"
 publish_to: 'none'
-version: 1.0.0+3
+version: 1.0.0+9
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -30,13 +30,10 @@ dependencies:
   # Notifications
   flutter_local_notifications: ^17.2.3
   timezone: ^0.9.4
-  flutter_timezone: ^2.0.0
+  flutter_timezone: ^5.1.0
 
   # Home Screen Widget
   home_widget: ^0.7.0
-
-  # Health Integration
-  health: ^11.1.0
 
   # In-App Purchase
   in_app_purchase: ^3.2.0
@@ -88,6 +85,10 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/images/newlogo.png"
+  # Fill transparent corners with the icon's background blue colour.
+  # Without this, iOS and Android render transparency as black.
+  background_color: "#4DC8F5"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true

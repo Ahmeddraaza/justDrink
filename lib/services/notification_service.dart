@@ -15,8 +15,15 @@ class NotificationService {
   Future<void> initialize() async {
     const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
 
-    // iOS: Register action categories here
+    // iOS: Register action categories here.
+    // IMPORTANT: requestAlertPermission etc. must be FALSE — the defaults
+    // are true, which causes the notification permission dialog to fire
+    // during initialize() in main(), BEFORE ATT. We defer the actual
+    // permission request to onboarding step 3 via requestPermission().
     final iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
       notificationCategories: [
         DarwinNotificationCategory(
           NotificationConstants.hydrationCategoryId,
@@ -125,7 +132,7 @@ class NotificationService {
             categoryIdentifier: NotificationConstants.hydrationCategoryId,
           ),
         ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
@@ -188,7 +195,7 @@ class NotificationService {
               NotificationConstants.channelName,
             ),
           ),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );

@@ -48,10 +48,6 @@
 	<string>This allows JustDrink to provide you with a better ads experience.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSHealthShareUsageDescription</key>
-	<string>JustDrink needs access to health data to sync your water intake.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>JustDrink needs access to health data to sync your water intake.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>JustDrink needs notifications to remind you to stay hydrated.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

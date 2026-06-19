@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import '../data/preferences/preferences_service.dart';
 import '../data/database/daos/user_profile_dao.dart';
 import 'widget_service.dart';
@@ -50,8 +51,13 @@ class PurchaseService {
 
   Future<void> purchase(ProductDetails product) async {
     final param = PurchaseParam(productDetails: product);
-    // Subscriptions use buyNonConsumable for iOS StoreKit
-    await _iap.buyNonConsumable(purchaseParam: param);
+    // On Android: lifetime is a one-time product, subs are non-consumable
+    // On iOS: all non-consumable products use buyNonConsumable
+    if (Platform.isAndroid && product.id == productLifetime) {
+      await _iap.buyConsumable(purchaseParam: param, autoConsume: false);
+    } else {
+      await _iap.buyNonConsumable(purchaseParam: param);
+    }
   }
 
   Future<void> restorePurchases() async {
@@ -63,13 +69,18 @@ class PurchaseService {
     final msg = error.message.toLowerCase();
     final code = error.code.toLowerCase();
 
+    // iOS cancellation codes
     if (code.contains('cancel') || code == 'e_user_cancelled' || code == 'user_cancelled') {
       return true;
     }
-    if (msg.contains('cancel') || msg.contains('user cancelled')) {
+    // Android Google Play cancellation codes
+    if (code == 'brs_user_cancelled' || code == 'user_canceled' || code == '1') {
       return true;
     }
-    // SKErrorDomain code 2 = user cancelled
+    if (msg.contains('cancel') || msg.contains('user cancelled') || msg.contains('user canceled')) {
+      return true;
+    }
+    // SKErrorDomain code 2 = iOS user cancelled
     if (code == '2' || msg.contains('skerror') || msg.contains('code 2') || msg.contains('cancelled')) {
       return true;
     }
@@ -149,22 +160,39 @@ class PurchaseService {
 
   static const _envChannel = MethodChannel('com.hanotech.justdrink/environment');
 
-  /// Asks the native iOS layer (StoreKit 2) whether any of our subscription
+  /// Asks the native layer whether any of our subscription
   /// product IDs have an active, non-revoked entitlement right now.
-  /// StoreKit 2's Transaction.currentEntitlements is the ONLY reliable
-  /// client-side way to check — StoreKit 1's restorePurchases returns expired
-  /// transactions with 'restored' status, making it useless for expiry detection.
   Future<bool> _hasActiveSubscription() async {
     try {
-      if (!Platform.isIOS) return true; // Android — skip for now
-      final result = await _envChannel.invokeMethod<bool>(
-        'hasActiveSubscription',
-        [productWeekly, productAnnual, productLifetime],
-      );
-      return result ?? false;
+      if (Platform.isIOS) {
+        final result = await _envChannel.invokeMethod<bool>(
+          'hasActiveSubscription',
+          [productWeekly, productAnnual, productLifetime],
+        );
+        return result ?? false;
+      } else if (Platform.isAndroid) {
+        final androidAddition = _iap.getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
+        final response = await androidAddition.queryPastPurchases();
+        
+        if (response.error != null) {
+          debugPrint('Android past purchases query failed: ${response.error?.message}');
+          // Safe fallback if query fails
+          return true; 
+        }
+
+        for (var purchase in response.pastPurchases) {
+          if (purchase.productID == productWeekly || 
+              purchase.productID == productAnnual || 
+              purchase.productID == productLifetime) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return true;
     } catch (e) {
-      debugPrint('StoreKit 2 entitlement check failed: $e');
-      // If the native call fails (e.g. iOS < 15), don't expire — be safe
+      debugPrint('Entitlement check failed: $e');
+      // If the native call fails, don't expire — be safe
       return true;
     }
   }

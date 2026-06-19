@@ -4,13 +4,15 @@ import '../data/database/app_database.dart';
 
 class WidgetService {
   static const _appGroupId   = 'group.com.hanotech.justdrinkfreemium.appgroup';  // iOS App Group
-  static const _androidClass = 'com.hanotech.justdrinkfreemium.JustDrinkWidgetProvider';
+  static const _androidClass = 'JustDrinkWidgetProvider';
   static const _iOSName      = 'JustDrinkWidget';
 
   Future<void> initialize() async {
     await HomeWidget.setAppGroupId(_appGroupId);
-    // Register callback for when widget button is tapped
+    // Register callback for when widget button is tapped (iOS 17+)
     HomeWidget.registerInteractivityCallback(_widgetBackgroundCallback);
+    // Register background callback for Android background intents
+    HomeWidget.registerBackgroundCallback(_widgetBackgroundCallback);
   }
 
   // Called by any cubit after data changes
@@ -20,12 +22,13 @@ class WidgetService {
     required bool isPremium,
     String theme = 'default',
   }) async {
-    final glassSize = (goalMl / 10).round(); // Default to 1/10th of goal
-    
+    final glassSize = (goalMl / 10).round().clamp(50, 500);
+    final glassesCount = glassSize > 0 ? (currentMl / glassSize).floor() : 0;
+
     await HomeWidget.saveWidgetData<int>('currentMl', currentMl);
     await HomeWidget.saveWidgetData<int>('goalMl', goalMl);
     await HomeWidget.saveWidgetData<int>('glassSize', glassSize);
-    await HomeWidget.saveWidgetData<int>('glassesCount', (currentMl / glassSize).floor());
+    await HomeWidget.saveWidgetData<int>('glassesCount', glassesCount);
     await HomeWidget.saveWidgetData<bool>('isPremium', isPremium);
     await HomeWidget.saveWidgetData<String>('theme', isPremium ? theme : 'default');
     await HomeWidget.saveWidgetData<double>(
@@ -84,16 +87,18 @@ Future<void> _widgetBackgroundCallback(Uri? uri) async {
   final total   = await db.waterLogDao.getTodayTotalMl();
   final profile = await db.userProfileDao.getProfile();
   if (profile != null) {
-    await HomeWidget.saveWidgetData('currentMl', total);
-    await HomeWidget.saveWidgetData('goalMl', profile.dailyGoalMl);
-    await HomeWidget.saveWidgetData(
-      'progress',
-      profile.dailyGoalMl > 0
-          ? (total / profile.dailyGoalMl).clamp(0.0, 1.0)
-          : 0.0,
-    );
+    final goalMl       = profile.dailyGoalMl;
+    final glassSize    = (goalMl / 10).round().clamp(50, 500);
+    final glassesCount = glassSize > 0 ? (total / glassSize).floor() : 0;
+    final progress     = goalMl > 0 ? (total / goalMl).clamp(0.0, 1.0) : 0.0;
+
+    await HomeWidget.saveWidgetData<int>('currentMl', total);
+    await HomeWidget.saveWidgetData<int>('goalMl', goalMl);
+    await HomeWidget.saveWidgetData<int>('glassSize', glassSize);
+    await HomeWidget.saveWidgetData<int>('glassesCount', glassesCount);
+    await HomeWidget.saveWidgetData<double>('progress', progress);
     await HomeWidget.updateWidget(
-      androidName: 'com.hanotech.justdrinkfreemium.JustDrinkWidgetProvider',
+      androidName: 'JustDrinkWidgetProvider',
       iOSName: 'JustDrinkWidget',
     );
   }

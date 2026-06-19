@@ -13,9 +13,11 @@ class AdService {
   Function()? onInterstitialLoaded;
   Function()? onInterstitialClosed;
 
+  /// NOTE: MobileAds.instance.initialize() is called in the splash screen
+  /// AFTER UMP consent and ATT are collected. This method is kept for
+  /// API compatibility only.
   Future<void> initialize() async {
-    await MobileAds.instance.initialize();
-    debugPrint('[AdService] MobileAds SDK initialized');
+    debugPrint('[AdService] AdService ready (SDK initialized in splash).');
   }
 
   // ── Interstitial Ad ───────────────────────────────────────────────

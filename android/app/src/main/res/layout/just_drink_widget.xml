@@ -1,65 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="20dp"
     android:background="@drawable/widget_background">
 
-    <!-- Water Wave Visual (Simplification) -->
-    <ImageView
+    <!-- Normal Content (Visible if Premium) -->
+    <FrameLayout
+        android:id="@+id/widget_normal_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--
+            Water fill: ClipDrawable fills from the BOTTOM upward edge-to-edge.
+            Level 0 = empty, 10000 = full. Set via setImageLevel in the provider.
+            This matches the iOS bottom-up water fill appearance.
+        -->
+        <ImageView
+            android:id="@+id/widget_water_fill"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/widget_water_clip"
+            android:scaleType="fitXY" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <!-- Drop icon: right-aligned, vertically centered -->
+            <ImageView
+                android:id="@+id/widget_drop_icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/widget_icon_blue"
+                android:scaleType="fitCenter"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="4dp"
+                android:alpha="0.9" />
+
+            <!-- Left content wrapped in a vertical LinearLayout to prevent overlapping -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/widget_drop_icon"
+                android:layout_marginEnd="6dp">
+
+                <!-- Time clock -->
+                <TextClock
+                    android:id="@+id/widget_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:format12Hour="h:mm a"
+                    android:textColor="#1A1C1E"
+                    android:textSize="17sp"
+                    android:fontFamily="sans-serif-black"
+                    android:textStyle="bold" />
+
+                <!-- Intake text -->
+                <TextView
+                    android:id="@+id/widget_intake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0ml / 2500ml (0 Glass)"
+                    android:textColor="#B31A1C1E"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginBottom="2dp" />
+
+                <!-- Add Glass button -->
+                <Button
+                    android:id="@+id/widget_add_glass"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:text="+ Add Glass"
+                    android:textAllCaps="false"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/widget_button_pill"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:includeFontPadding="false"
+                    android:stateListAnimator="@null"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+    </FrameLayout>
+
+    <!-- Locked Content (Visible if NOT Premium) -->
+    <LinearLayout
+        android:id="@+id/widget_locked_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/widget_water_waves"
-        android:scaleType="centerCrop"
-        android:alpha="0.4"
-        android:layout_alignParentBottom="true" />
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#D9000000"
+        android:visibility="gone">
 
-    <TextClock
-        android:id="@+id/widget_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:format12Hour="hh:mm a"
-        android:textColor="#1A1C1E"
-        android:textSize="28sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/widget_intake"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/widget_time"
-        android:text="0ml water(0 Glass)"
-        android:textColor="#8E9199"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginTop="2dp"/>
-
-    <!-- Floating Drop Icon -->
-    <ImageView
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:src="@drawable/widget_water_drops"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="10dp" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="4dp">
-
-        <Button
-            android:id="@+id/widget_add_glass"
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:text="Tap to Add Water"
-            android:textAllCaps="false"
-            android:textSize="13sp"
+            android:layout_height="wrap_content"
+            android:text="Premium Required"
+            android:textColor="#FFFFFF"
             android:textStyle="bold"
-            android:textColor="#1A1C1E"
-            android:background="@drawable/widget_button_pill"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"/>
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tap to Subscribe"
+            android:textColor="#B3FFFFFF"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp" />
+
     </LinearLayout>
-</RelativeLayout>
+
+</FrameLayout>
