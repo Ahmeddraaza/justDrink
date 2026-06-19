@@ -4,6 +4,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:get_it/get_it.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'data/preferences/preferences_service.dart';
 import 'services/database_service.dart';
@@ -16,6 +17,12 @@ import 'app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+  }
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -24,7 +31,7 @@ void main() async {
   try {
     tz.initializeTimeZones();
     final localTimezone = await FlutterTimezone.getLocalTimezone().timeout(const Duration(seconds: 2));
-    tz.setLocalLocation(tz.getLocation(localTimezone));
+    tz.setLocalLocation(tz.getLocation(localTimezone.identifier));
   } catch (e) {
     tz.setLocalLocation(tz.getLocation('UTC'));
   }
@@ -37,7 +44,7 @@ void main() async {
   try {
     await notificationService.initialize().timeout(const Duration(seconds: 5));
   } catch (e) {
-    // Error logging removed for production
+    debugPrint('Notification init failed: $e');
   }
 
   final widgetService = WidgetService();
@@ -47,7 +54,7 @@ void main() async {
   try {
     await adService.initialize().timeout(const Duration(seconds: 3));
   } catch (e) {
-    // Error logging removed for production
+    debugPrint('Ad service init failed: $e');
   }
 
   // final purchaseService = PurchaseService();
