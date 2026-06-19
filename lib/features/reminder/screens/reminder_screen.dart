@@ -49,8 +49,8 @@ class _ReminderScreenState extends State<ReminderScreen> {
             .map((t) => TimeOfDay(hour: t.hour, minute: t.minute))
             .toList();
 
-        // Calculate next reminder time strictly among the active ones
-        final baseActiveReminders = profile.isPremium ? reminders : reminders.take(6).toList();
+        // All 10 reminders are active — no premium gate on this branch
+        final baseActiveReminders = reminders;
         
         // Filter out individually disabled reminders
         final disabledTimes = PreferencesService.instance.disabledReminderTimes;
@@ -108,7 +108,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                     style: AppTextStyles.h3.copyWith(color: AppColors.heading),
                   ),
                   Text(
-                    profile.isPremium ? '10 active reminders' : '6 active / 4 locked',
+                    '10 active reminders',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
@@ -120,7 +120,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
               ...reminders.asMap().entries.map((entry) {
                 final index = entry.key;
                 final time = entry.value;
-                final isLocked = !profile.isPremium && index >= 6;
+                const isLocked = false;
                 
                 final hourStr = time.hour.toString().padLeft(2, '0');
                 final minStr = time.minute.toString().padLeft(2, '0');
@@ -134,7 +134,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                   onToggle: (val) => _toggleSingleReminder(context, time, val),
                   onTap: () {
                     if (isLocked) {
-                      // context.push(Routes.paywall);
+                      // No paywall on this branch
                     } else {
                       _showRoutineGuide(context);
                     }
