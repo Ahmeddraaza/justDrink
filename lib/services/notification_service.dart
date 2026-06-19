@@ -15,8 +15,15 @@ class NotificationService {
   Future<void> initialize() async {
     const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
 
-    // iOS: Register action categories here
+    // iOS: Register action categories here.
+    // IMPORTANT: requestAlertPermission etc. must be FALSE — the defaults
+    // are true, which causes the notification permission dialog to fire
+    // during initialize() in main(), BEFORE any permission prompts. We defer
+    // the actual permission request to onboarding step 3 via requestPermission().
     final iosInit = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
       notificationCategories: [
         DarwinNotificationCategory(
           NotificationConstants.hydrationCategoryId,
@@ -44,7 +51,7 @@ class NotificationService {
         onDidReceiveBackgroundNotificationResponse: _onBackgroundNotificationResponse,
       ).timeout(const Duration(seconds: 5));
     } catch (e) {
-      // Error logging removed for production
+      debugPrint('Notification plugin initialization failed or timed out: $e');
     }
   }
 
@@ -125,7 +132,7 @@ class NotificationService {
             categoryIdentifier: NotificationConstants.hydrationCategoryId,
           ),
         ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
@@ -138,6 +145,11 @@ class NotificationService {
   }
 
   Future<void> rescheduleAll(UserProfileData profile) async {
+    if (!profile.remindersEnabled) {
+      await cancelAll();
+      return;
+    }
+
     final text = profile.customNotificationText ?? 'Time to drink water!';
     final count = profile.isPremium ? 10 : 6;
     await scheduleAll(
@@ -183,7 +195,7 @@ class NotificationService {
               NotificationConstants.channelName,
             ),
           ),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
         );
