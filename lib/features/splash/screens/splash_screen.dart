@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               children: [
                  // Logo
                 Image.asset(
-                  'assets/images/newlogoproo.png',
+                  'assets/images/logoicon.png',
                   width: 120,
                   height: 120,
                 ),

@@ -1,4 +1,4 @@
-package com.justdrink.justdrink
+package com.hanotech.justdrinkapp
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,7 +10,7 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         
-        if (action == "com.justdrink.LOG_250") {
+        if (action == "com.hanotech.justdrinkapp.LOG_250") {
             // This is a placeholder for custom intent handling
             // Most notification actions are handled by the Flutter isolate via flutter_local_notifications
         }

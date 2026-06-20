@@ -1,4 +1,4 @@
-package com.justdrink.justdrink
+package com.hanotech.justdrinkapp
 
 import android.appwidget.AppWidgetManager
 import android.content.Context

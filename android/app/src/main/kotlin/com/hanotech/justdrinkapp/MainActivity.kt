@@ -1,4 +1,4 @@
-package com.justdrink.justdrink
+package com.hanotech.justdrinkapp
 
 import io.flutter.embedding.android.FlutterActivity
 
