@@ -10,7 +10,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../services/notification_service.dart';
 import '../../../data/preferences/preferences_service.dart';
-import '../../../shared/widgets/banner_ad_widget.dart';
 import '../widgets/settings_header.dart';
 import '../widgets/settings_card.dart';
 import '../../../services/widget_service.dart';
@@ -152,7 +151,7 @@ class _SettingsView extends StatelessWidget {
                 onTap: () => _launchURL('https://hanotech.net/privacy-policy'),
               ),
               const SizedBox(height: 32),
-              const BannerAdWidget(),
+              const SizedBox.shrink(),
               const SizedBox(height: 24),
               Center(
                 child: Text(

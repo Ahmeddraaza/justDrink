@@ -36,9 +36,6 @@ dependencies:
   home_widget: ^0.7.0
 
 
-  # Ads
-  google_mobile_ads: ^5.1.0
-
   # Charts
   fl_chart: ^0.69.0
 

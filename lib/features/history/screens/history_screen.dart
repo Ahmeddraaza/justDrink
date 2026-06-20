@@ -11,7 +11,6 @@ import '../../../core/constants/route_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/water_log_dao.dart';
-import '../../../shared/widgets/banner_ad_widget.dart';
 import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
 import '../../../shared/widgets/floating_navbar.dart';
 
@@ -54,7 +53,7 @@ class _HistoryView extends StatelessWidget {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const BannerAdWidget(),
+          const SizedBox.shrink(),
           const FloatingNavbar(activeRoute: Routes.history),
         ],
       ),

@@ -11,7 +11,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/database/daos/water_log_dao.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../data/preferences/preferences_service.dart';
-import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
 import 'package:flutter/services.dart';
 import '../../../shared/widgets/floating_navbar.dart';
@@ -31,7 +30,6 @@ class DashboardScreen extends StatelessWidget {
             waterLogDao: GetIt.I<WaterLogDao>(),
             userProfileDao: GetIt.I<UserProfileDao>(),
             preferencesService: GetIt.I<PreferencesService>(),
-            adCubit: context.read<AdCubit>(),
             widgetSyncCubit: context.read<WidgetSyncCubit>(),
           )..initialize(),
         ),

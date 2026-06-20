@@ -8,10 +8,8 @@ import 'core/constants/route_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'data/preferences/preferences_service.dart';
 import 'features/onboarding/cubit/onboarding_cubit.dart';
-import 'shared/cubits/ad/ad_cubit.dart';
 import 'shared/cubits/notification/notification_cubit.dart';
 import 'shared/cubits/widget_sync/widget_sync_cubit.dart';
-import 'services/ad_service.dart';
 import 'services/notification_service.dart';
 import 'services/widget_service.dart';
 import 'data/database/daos/water_log_dao.dart';
@@ -38,10 +36,6 @@ class JustDrinkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => AdCubit(adService: GetIt.I<AdService>())
-            ..initialize(GetIt.I<PreferencesService>().isPremium),
-        ),
         BlocProvider(
           create: (context) => NotificationCubit(
             notificationService: GetIt.I<NotificationService>(),

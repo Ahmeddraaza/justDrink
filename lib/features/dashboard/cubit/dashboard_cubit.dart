@@ -4,14 +4,12 @@ import 'dashboard_state.dart';
 import '../../../data/database/daos/water_log_dao.dart';
 import '../../../data/database/daos/user_profile_dao.dart';
 import '../../../data/preferences/preferences_service.dart';
-import '../../../shared/cubits/ad/ad_cubit.dart';
 import '../../../shared/cubits/widget_sync/widget_sync_cubit.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
   final WaterLogDao waterLogDao;
   final UserProfileDao userProfileDao;
   final PreferencesService preferencesService;
-  final AdCubit adCubit;
   final WidgetSyncCubit widgetSyncCubit;
 
   StreamSubscription? _totalSubscription;
@@ -23,7 +21,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     required this.waterLogDao,
     required this.userProfileDao,
     required this.preferencesService,
-    required this.adCubit,
     required this.widgetSyncCubit,
   }) : super(const DashboardState());
 
@@ -49,29 +46,14 @@ class DashboardCubit extends Cubit<DashboardState> {
       }
     });
 
-    _loadAdCounter();
     emit(state.copyWith(
       isLoading: false,
       isWidgetAdded: preferencesService.isWidgetAdded,
     ));
   }
 
-  Future<void> _loadAdCounter() async {
-    final count = preferencesService.getInt('ad_log_counter') ?? 0;
-    emit(state.copyWith(appLogCountToday: count));
-  }
-
   Future<void> logWater(int amountMl) async {
     final id = await waterLogDao.logWater(amountMl: amountMl, source: 'app');
-    
-    // Handle ad logic
-    if (!state.isPremium) {
-      final newCount = await preferencesService.getAndIncrementAdCounter();
-      emit(state.copyWith(appLogCountToday: newCount));
-      if (newCount % 3 == 0) {
-        adCubit.showInterstitial();
-      }
-    }
 
     emit(state.copyWith(showUndo: true, lastLoggedId: id));
     widgetSyncCubit.sync();

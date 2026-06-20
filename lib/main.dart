@@ -10,8 +10,6 @@ import 'data/preferences/preferences_service.dart';
 import 'services/database_service.dart';
 import 'services/notification_service.dart';
 import 'services/widget_service.dart';
-import 'services/ad_service.dart';
-// import 'services/purchase_service.dart';
 import 'app.dart';
 
 void main() async {
@@ -50,13 +48,6 @@ void main() async {
   final widgetService = WidgetService();
   await widgetService.initialize();
 
-  final adService = AdService();
-  try {
-    await adService.initialize().timeout(const Duration(seconds: 3));
-  } catch (e) {
-    debugPrint('Ad service init failed: $e');
-  }
-
   // final purchaseService = PurchaseService();
   // try {
   //   await purchaseService.initialize().timeout(const Duration(seconds: 3));
@@ -68,7 +59,6 @@ void main() async {
   DatabaseService.registerWithGetIt(sl);
   sl.registerSingleton<NotificationService>(notificationService);
   sl.registerSingleton<WidgetService>(widgetService);
-  sl.registerSingleton<AdService>(adService);
   // sl.registerSingleton<PurchaseService>(purchaseService);
   sl.registerSingleton<PreferencesService>(PreferencesService.instance);
 

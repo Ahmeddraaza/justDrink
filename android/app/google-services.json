@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:858953407669:android:de64bc46f790cbc0b4b2fc",
+        "android_client_info": {
+          "package_name": "com.hanotech.justdrinkapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAi9DbsHbcv3k2ZSXA7tFybEtqz6_GMZQA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:858953407669:android:356ea3fa0278c0efb4b2fc",
         "android_client_info": {
           "package_name": "com.hanotech.justdrinkfreemium"
