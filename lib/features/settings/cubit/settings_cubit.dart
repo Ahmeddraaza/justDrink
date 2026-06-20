@@ -26,7 +26,6 @@ class SettingsCubit extends Cubit<SettingsState> {
       if (profile != null) {
         emit(state.copyWith(
           profile: profile,
-          isPremium: profile.isPremium,
           isWidgetAdded: preferencesService.isWidgetAdded,
         ));
       }

@@ -5,13 +5,11 @@ import '../../../core/theme/app_text_styles.dart';
 class SettingsHeader extends StatelessWidget {
   final int dailyGoal;
   final double weight;
-  final bool isPremium;
 
   const SettingsHeader({
     super.key,
     required this.dailyGoal,
     required this.weight,
-    required this.isPremium,
   });
 
   @override
@@ -43,7 +41,7 @@ class SettingsHeader extends StatelessWidget {
             right: -10,
             top: -10,
             child: Icon(
-              isPremium ? Icons.workspace_premium_outlined : Icons.person_outline,
+              Icons.person_outline,
               size: 100,
               color: Colors.white.withValues(alpha: 0.1),
             ),
@@ -51,35 +49,12 @@ class SettingsHeader extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Text(
-                    'Your Profile',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (isPremium) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
-                      ),
-                      child: Text(
-                        'PRO',
-                        style: TextStyle(
-                          color: Colors.amber[200],
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+              Text(
+                'Your Profile',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -95,31 +70,6 @@ class SettingsHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              if (!isPremium)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Unlock all features with JustDrink PRO',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right, color: Colors.white60, size: 20),
-                    ],
-                  ),
-                ),
             ],
           ),
         ],

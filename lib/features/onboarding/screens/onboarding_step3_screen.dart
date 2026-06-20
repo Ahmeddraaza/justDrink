@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../cubit/onboarding_cubit.dart';
@@ -75,8 +76,25 @@ class _OnboardingStep3View extends StatelessWidget {
               BlocConsumer<OnboardingCubit, OnboardingState>(
                 listener: (context, state) {
                   if (state.errorMessage != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.errorMessage!)),
+                    // Use platform-adaptive dialog: CupertinoAlertDialog on iOS, AlertDialog on Android
+                    showAdaptiveDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog.adaptive(
+                        title: const Text('Something went wrong'),
+                        content: Text(state.errorMessage!),
+                        actions: [
+                          if (Theme.of(ctx).platform == TargetPlatform.iOS)
+                            CupertinoDialogAction(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('OK'),
+                            )
+                          else
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('OK'),
+                            ),
+                        ],
+                      ),
                     );
                   }
                   if (!state.isLoading && state.currentStep == 0 && state.errorMessage == null) {

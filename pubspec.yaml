@@ -36,11 +36,6 @@ dependencies:
   home_widget: ^0.7.0
 
 
-  # In-App Purchase
-  in_app_purchase: ^3.2.0
-  in_app_purchase_android: ^0.3.6
-  in_app_purchase_storekit: ^0.3.17
-
   # Ads
   google_mobile_ads: ^5.1.0
 

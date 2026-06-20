@@ -1,6 +1,6 @@
 class AppConstants {
-  // Replace with real ad unit IDs from AdMob console
-  // Test IDs for development:
+  // Ads are disabled in this build — these IDs are kept but AdService.initialize()
+  // returns immediately so no ads are ever loaded or shown.
   static const bannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
   static const interstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
 
@@ -8,8 +8,4 @@ class AppConstants {
   static const widgetAppGroupId = 'group.com.hanotech.justdrink.apppgroup';
   static const widgetAndroidName = 'com.justdrink.app.JustDrinkWidgetProvider';
   static const widgetIOSName = 'JustDrinkWidget';
-
-  // Purchase Product IDs
-  static const productMonthly = 'justdrink_pro_monthly';
-  static const productAnnual = 'justdrink_pro_annual';
 }

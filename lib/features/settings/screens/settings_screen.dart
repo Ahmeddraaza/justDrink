@@ -59,14 +59,10 @@ class _SettingsView extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
             children: [
-              GestureDetector(
-                // onTap: profile.isPremium ? null : () => context.push(Routes.paywall),
-                child: SettingsHeader(
+              SettingsHeader(
                   dailyGoal: profile.dailyGoalMl,
                   weight: profile.weightKg,
-                  isPremium: profile.isPremium,
                 ),
-              ),
               const SizedBox(height: 32),
               
               _SectionHeader(title: 'Hydration'),

@@ -117,11 +117,7 @@ class _ReminderScreenState extends State<ReminderScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              ...reminders.asMap().entries.map((entry) {
-                final index = entry.key;
-                final time = entry.value;
-                const isLocked = false;
-                
+              ...reminders.map((time) {
                 final hourStr = time.hour.toString().padLeft(2, '0');
                 final minStr = time.minute.toString().padLeft(2, '0');
                 final timeString = '$hourStr:$minStr';
@@ -129,16 +125,10 @@ class _ReminderScreenState extends State<ReminderScreen> {
 
                 return ReminderTile(
                   time: time,
-                  isActive: profile.remindersEnabled && !isLocked && !isTileDisabled,
-                  isLocked: isLocked,
+                  isActive: profile.remindersEnabled && !isTileDisabled,
+                  isLocked: false,
                   onToggle: (val) => _toggleSingleReminder(context, time, val),
-                  onTap: () {
-                    if (isLocked) {
-                      // No paywall on this branch
-                    } else {
-                      _showRoutineGuide(context);
-                    }
-                  },
+                  onTap: () => _showRoutineGuide(context),
                 );
               }),
             ],

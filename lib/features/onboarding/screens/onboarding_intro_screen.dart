@@ -69,8 +69,24 @@ class _OnboardingIntroViewState extends State<_OnboardingIntroView> {
       body: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage!)),
+            showAdaptiveDialog(
+              context: context,
+              builder: (ctx) => AlertDialog.adaptive(
+                title: const Text('Something went wrong'),
+                content: Text(state.errorMessage!),
+                actions: [
+                  if (Theme.of(ctx).platform == TargetPlatform.iOS)
+                    CupertinoDialogAction(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('OK'),
+                    )
+                  else
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('OK'),
+                    ),
+                ],
+              ),
             );
           }
         },

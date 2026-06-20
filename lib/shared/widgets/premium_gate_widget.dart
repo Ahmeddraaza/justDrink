@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/constants/route_constants.dart';
-import '../../../shared/cubits/ad/ad_cubit.dart';
-import '../../../shared/cubits/ad/ad_state.dart';
+import '../cubits/ad/ad_cubit.dart';
+import '../cubits/ad/ad_state.dart';
 
+/// On the free-adfree-premium branch, isPremium is always true in the DAO.
+/// This widget still exists to avoid breaking any existing usages,
+/// but simply renders [child] at full opacity since all features are unlocked.
 class PremiumGateWidget extends StatelessWidget {
   final Widget child;
 
@@ -14,35 +15,8 @@ class PremiumGateWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AdCubit, AdState>(
       builder: (context, state) {
-        return Stack(
-          children: [
-            Opacity(
-              opacity: state.isPremium ? 1.0 : 0.5,
-              child: IgnorePointer(
-                ignoring: !state.isPremium,
-                child: child,
-              ),
-            ),
-            if (!state.isPremium)
-              Positioned.fill(
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    // onTap: () => context.push(Routes.paywall),
-                    child: Container(
-                      alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.only(right: 16),
-                      child: const Icon(
-                        Icons.lock_outline,
-                        color: Colors.amber,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
+        // All features are unlocked on this branch — always render child normally
+        return child;
       },
     );
   }
