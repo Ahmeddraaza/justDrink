@@ -70,14 +70,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               children: [
                  // Logo
                 Image.asset(
-                  'assets/images/logoicon.png',
+                  'assets/images/newlogoproo.png',
                   width: 120,
                   height: 120,
                 ),
                 const SizedBox(height: 24),
                 // Title
                 Text(
-                  'Just Drink',
+                  'Just Drink Pro',
                   style: AppTextStyles.h1.copyWith(
                     color: Colors.white,
                     fontSize: 32,
