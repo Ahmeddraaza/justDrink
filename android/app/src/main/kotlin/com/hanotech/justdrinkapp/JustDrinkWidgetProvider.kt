@@ -18,21 +18,68 @@ class JustDrinkWidgetProvider : HomeWidgetProvider() {
     ) {
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.just_drink_widget).apply {
-                val currentMl = widgetData.getInt("currentMl", 0)
-                val glassSize = widgetData.getInt("glassSize", 250)
+                val currentMl    = widgetData.getInt("currentMl", 0)
+                val goalMl       = widgetData.getInt("goalMl", 2500)
+                val glassSize    = widgetData.getInt("glassSize", 250)
                 val glassesCount = widgetData.getInt("glassesCount", 0)
-                val progress = (widgetData.getFloat("progress", 0f) * 100).toInt()
 
-                setTextViewText(R.id.widget_intake, "${currentMl}ml water($glassesCount Glass)")
-                
-                // Background Intent using dynamic glassSize
+                // progress may be stored as Double (Long bits) or Float — handle both safely
+                val progress: Float = try {
+                    widgetData.getFloat("progress", 0f)
+                } catch (e: ClassCastException) {
+                    // Dart's saveWidgetData<double> stores a Long on Android
+                    val bits = widgetData.getLong("progress", 0L)
+                    java.lang.Double.longBitsToDouble(bits).toFloat()
+                }
+
+                // Water fill level: scale drawable uses 0–10000 scale (0=empty, 10000=full)
+                val fillLevel = (progress * 10000).toInt().coerceIn(0, 10000)
+
+                // Update intake label
+                setTextViewText(R.id.widget_intake, "${currentMl}ml / ${goalMl}ml (${glassesCount} Glass)")
+
+                // Update water fill
+                setInt(R.id.widget_water_fill, "setImageLevel", fillLevel)
+
+                // Handle text colors: turn white when fully filled
+                val fillFraction = progress
+                val textColor = if (fillFraction >= 1.0f) {
+                    android.graphics.Color.WHITE
+                } else {
+                    android.graphics.Color.parseColor("#1A1C1E")
+                }
+                val subTextColor = if (fillFraction >= 1.0f) {
+                    android.graphics.Color.argb(217, 255, 255, 255)
+                } else {
+                    android.graphics.Color.argb(179, 26, 28, 30)
+                }
+                setTextColor(R.id.widget_time, textColor)
+                setTextColor(R.id.widget_intake, subTextColor)
+
+                // Handle full state: swap background to solid blue, hide wave fill
+                if (fillFraction >= 1.0f) {
+                    setInt(R.id.widget_container, "setBackgroundResource", R.drawable.widget_water_full_bg)
+                    setViewVisibility(R.id.widget_water_fill, android.view.View.GONE)
+                } else {
+                    setInt(R.id.widget_container, "setBackgroundResource", R.drawable.widget_background)
+                    setViewVisibility(R.id.widget_water_fill, android.view.View.VISIBLE)
+                }
+
+                // Swap icon: white when full, blue otherwise
+                if (fillFraction >= 1.0f) {
+                    setImageViewResource(R.id.widget_drop_icon, R.drawable.widget_icon_white)
+                } else {
+                    setImageViewResource(R.id.widget_drop_icon, R.drawable.widget_icon_blue)
+                }
+
+                // Background Intent — logs one glass (button click) silently in background
                 val logIntent = HomeWidgetBackgroundIntent.getBroadcast(
                     context,
                     Uri.parse("justdrink://log?amount=$glassSize")
                 )
                 setOnClickPendingIntent(R.id.widget_add_glass, logIntent)
 
-                // App Launch Intent
+                // App Launch Intent — tapping container opens app
                 val launchIntent = HomeWidgetLaunchIntent.getActivity(
                     context,
                     MainActivity::class.java
