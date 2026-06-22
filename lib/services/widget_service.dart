@@ -4,7 +4,7 @@ import '../data/database/app_database.dart';
 
 class WidgetService {
   static const _appGroupId   = 'group.com.hanotech.justdrink.apppgroup';  // iOS App Group
-  static const _androidClass = 'com.hanotech.justdrinkapp.JustDrinkWidgetProvider';
+  static const _androidClass = 'JustDrinkWidgetProvider';
   static const _iOSName      = 'JustDrinkWidget';
 
   Future<void> initialize() async {
@@ -97,7 +97,7 @@ Future<void> _widgetBackgroundCallback(Uri? uri) async {
     await HomeWidget.saveWidgetData<int>('glassesCount', glassesCount);
     await HomeWidget.saveWidgetData<double>('progress', progress);
     await HomeWidget.updateWidget(
-      androidName: 'com.hanotech.justdrinkapp.JustDrinkWidgetProvider',
+      androidName: 'JustDrinkWidgetProvider',
       iOSName: 'JustDrinkWidget',
     );
   }
