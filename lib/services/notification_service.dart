@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz_data;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import '../core/constants/notification_constants.dart';
 import '../core/utils/notification_scheduler.dart';
 import '../data/database/app_database.dart';
@@ -151,7 +153,10 @@ class NotificationService {
     }
 
     final text = profile.customNotificationText ?? 'Time to drink water!';
-    final count = profile.isPremium ? 10 : 6;
+    // Use the stored reminderCount from the user profile.
+    // On this free branch isPremium is always true — all users get up to 10.
+    // profile.reminderCount defaults to 6 in DB; settings lets user set it.
+    final count = profile.reminderCount.clamp(1, 10);
     await scheduleAll(
       wakeTime: profile.wakeTime,
       sleepTime: profile.sleepTime,
@@ -180,6 +185,14 @@ class NotificationService {
     } else if (actionId == NotificationConstants.actionSnooze10) {
       final plugin = FlutterLocalNotificationsPlugin();
       if (notifId != null) {
+        // Ensure timezone is initialized before using tz.TZDateTime
+        try {
+          tz_data.initializeTimeZones();
+          final localTz = await FlutterTimezone.getLocalTimezone();
+          tz.setLocalLocation(tz.getLocation(localTz.identifier));
+        } catch (_) {
+          // Fall back to UTC if timezone init fails
+        }
         await plugin.cancel(notifId);
         final snoozeTime = tz.TZDateTime.now(tz.local).add(
           const Duration(minutes: 10),
