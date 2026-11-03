@@ -1,7 +1,7 @@
 name: justdrink
 description: "JustDrink — Water Reminder"
 publish_to: 'none'
-version: 1.0.0+9
+version: 1.0.0+10
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -36,9 +36,10 @@ dependencies:
   home_widget: ^0.7.0
 
   # In-App Purchase
-  in_app_purchase: ^3.2.0
-  in_app_purchase_android: ^0.3.6
-  in_app_purchase_storekit: ^0.3.17
+  in_app_purchase: ^3.3.1
+  # 0.5.0+ bundles Google Play Billing Library 8+ (Play requires >= 8.0.0 from Aug 31, 2026)
+  in_app_purchase_android: ^0.5.3
+  in_app_purchase_storekit: ^0.4.13
 
   # Ads
   google_mobile_ads: ^5.1.0
@@ -54,9 +55,6 @@ dependencies:
 
   # DI
   get_it: ^8.0.2
-
-  # App Settings (open OS settings page)
-  app_settings: ^5.1.1
 
   # Icons
   flutter_svg: ^2.0.10+1
